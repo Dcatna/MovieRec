@@ -16,7 +16,7 @@ const ImageGrid = ({ images }: {images: string[]}) => {
         <div className="grid grid-cols-2 aspect-square h-full">
             {images.map((image, i) => (
                 <img
-                  src={`https://image.tmdb.org/t/p/original/${image}`}
+                  src={image}
                   alt={`Image ${i + 1}`}
                   className={cn(`overflow-clip object-cover aspect-square rounded-${roundingFromIdx(i)}-lg`)}
               />

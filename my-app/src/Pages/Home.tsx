@@ -120,7 +120,7 @@ function DefaultListListing(
                       <div className="flex flex-col me-2">
                         <CrossfadeImage 
                             className="h-56 object-cover aspect-[3/4] rounded-md"
-                            src={`https://image.tmdb.org/t/p/original/${item.poster_path}`} 
+                            src={item.poster_path} 
                         />
                         <h2 className="text-xl w-44 line-clamp-2">{item.title}</h2>
                       </div>

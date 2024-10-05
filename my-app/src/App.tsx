@@ -67,6 +67,7 @@ const ScrollProvider: React.FC<{
 function App() {
 
   const user = useUserStore(useShallow((state) => state.stored));
+  const signOut = useUserStore((state) => state.signOut);
   const refreshUser = useUserStore(state => state.refreshUser);
   const refreshPlaylists = useUserStore((state) => state.refreshPlaylists);
   const playlists = useUserStore(useShallow((state) => state.playlists));
@@ -83,6 +84,7 @@ function App() {
     <div className="bg-background max-h-screen overflow-hidden flex flex-col">
       <div className="grid grid-cols-5 max-h-screen max-w-screen">
         <Sidebar
+          signOut={signOut}
           user={user}
           refreshPlaylist={refreshPlaylists}
           playlists={playlists}

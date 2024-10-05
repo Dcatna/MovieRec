@@ -5,8 +5,6 @@ import {
   GlobeIcon,
   LibraryIcon,
   RefreshCwIcon,
-  SearchIcon,
-  SettingsIcon,
   LogInIcon,
   SparkleIcon,
   TrainIcon,
@@ -24,6 +22,7 @@ interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
   user: StoredUser | null
   refreshPlaylist: () => void;
   onDeletePlaylist: (id: string) => void;
+  signOut: () => void;
   playlists: ListWithItems[];
 }
 
@@ -56,6 +55,7 @@ const games = [
 
 export function Sidebar({
   className,
+  signOut,
   playlists,
   onDeletePlaylist,
   refreshPlaylist,
@@ -84,7 +84,7 @@ export function Sidebar({
           </SidebarItem> : undefined}
           {user !== null ? 
           <SidebarItem
-            onClick={() => {}}
+            onClick={signOut}
             name="Sign out"
             selected={false}
           >

@@ -5,6 +5,7 @@ import {
   selectListsByUserId,
   signInWithEmailAndPassword,
   StoredUser,
+  supabaseSignOut,
 } from "./supabase-client";
 
 export type ListItem = {
@@ -40,6 +41,7 @@ export interface UserState {
   signIn: (email: string, password: string) => Promise<boolean>;
   refreshPlaylists: () => void;
   refreshUser: () => void;
+  signOut: () => void
 }
 
 const getStoredUser = () => {
@@ -96,4 +98,17 @@ export const useUserStore = create<UserState>((set, get) => ({
     );
     return res != null;
   },
+  signOut: async () => {
+    supabaseSignOut().then((res) => {
+      if (res) {
+        localStorage.setItem("user", "")
+        localStorage.setItem("stored", "")
+        set({
+          user: null,
+          stored: null,
+          playlists: []
+        })
+      }
+    })
+  }
 }));

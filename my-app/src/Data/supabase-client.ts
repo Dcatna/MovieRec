@@ -48,6 +48,15 @@ export function contentFrom(data: ListWithPostersRpcResponse) {
     })
 }
 
+export async function supabaseSignOut(): Promise<boolean> {
+    try {
+        supabase.auth.signOut()
+        return true
+    } catch {
+        return false
+    }
+}
+
 export async function getListWithPosters(
     type:  "select_most_recent_lists_with_poster_items" | "select_most_popular_lists_with_poster_items",
     limit: number,
