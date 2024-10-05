@@ -4,18 +4,18 @@ import {FetchPopularMovies} from '../Data/TMDB-fetch.ts'
 import { MovieListResponse, MovieListResult } from '../Types/TMDB-types'
 
 
-const Home = () => {
-    const [movies, setmovies] = useState<MovieListResult[]>([])
-    useEffect(() => {
-        async function fetchFunction() {
-            const res = await FetchPopularMovies(1, 'movie', [], undefined, undefined)
-            console.log([res as MovieListResponse])
-            setmovies(res.results as MovieListResult[])
-            console.log("HIII", movies)
+export function HomePage() {
+    // const [movies, setmovies] = useState<MovieListResult[]>([])
+    // useEffect(() => {
+    //     async function fetchFunction() {
+    //         const res = await FetchPopularMovies(1, 'movie', [], undefined, undefined)
+    //         console.log([res as MovieListResponse])
+    //         setmovies(res.results as MovieListResult[])
+    //         console.log("HIII", movies)
 
-        }
-        fetchFunction()
-    }, [])
+    //     }
+    //     fetchFunction()
+    // }, [])
 
   return (
     <div>
@@ -24,4 +24,4 @@ const Home = () => {
   )
 }
 
-export default Home
+export default HomePage
