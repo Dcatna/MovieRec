@@ -59,14 +59,6 @@ export function HomePage() {
   );
 }
 
-/*
-<DefaultListListing 
-        data={defaultList.data ?? undefined} 
-        error={defaultList.error} 
-        loading={defaultList.isLoading}
-        />
-*/
-
 interface UserListListingProps extends React.HTMLAttributes<HTMLDivElement> {
   loading: boolean;
   title: string
@@ -120,7 +112,7 @@ function DefaultListListing(
                       <div className="flex flex-col me-2">
                         <CrossfadeImage 
                             className="h-56 object-cover aspect-[3/4] rounded-md"
-                            src={item.poster_path} 
+                            src={item.poster_path?.replace("original", "w200")} 
                         />
                         <h2 className="text-xl w-44 line-clamp-2">{item.title}</h2>
                       </div>
