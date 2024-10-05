@@ -27,7 +27,7 @@ export type ListWithItems = {
   updated_at: string | undefined;
   public: Boolean;
   subscribers: number;
-  listitems: ListItem[];
+  listitem: ListItem[] | undefined;
 };
 
 export interface UserState {

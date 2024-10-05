@@ -72,22 +72,24 @@ export function Sidebar({
             {user?.username ?? "Signed out"}
           </h2>
           <UserProfileImage 
-            className="h-32 w-32"
+            className="h-48 w-48 my-8"
           />
+          {user === null ? 
           <SidebarItem
             onClick={() => navigate("auth")}
             name="Sign In"
             selected={location.pathname.includes("auth")}
           >
             {<LogInIcon />}
-          </SidebarItem>
+          </SidebarItem> : undefined}
+          {user !== null ? 
           <SidebarItem
-            onClick={() => navigate("search")}
-            name="Search"
-            selected={location.pathname.includes("search")}
+            onClick={() => {}}
+            name="Sign out"
+            selected={false}
           >
-            {<SearchIcon />}
-          </SidebarItem>
+            {<LogInIcon />}
+          </SidebarItem> : undefined}
         </div>
       </div>
 

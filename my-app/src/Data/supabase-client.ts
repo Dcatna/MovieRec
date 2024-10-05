@@ -1,4 +1,4 @@
-import { createClient, Session, User } from '@supabase/supabase-js'
+import { createClient, Session, SupabaseClient, User } from '@supabase/supabase-js'
 import { Database } from './supabase'
 import { ListWithItems } from './userstore';
 
@@ -16,6 +16,50 @@ export type StoredUser = {
     username: string;
 }
 
+
+export type ListWithPostersRpcResponse = {
+    created_at: string,
+    description: string,
+    list_id: string,
+    name: string,
+    public: boolean,
+    updated_at?: string,
+    user_id: string,
+    username: string,
+    profile_image?: string,
+    ids: string[]
+    total?: number
+}
+
+export function contentFrom(data: ListWithPostersRpcResponse) {
+    return data.ids?.map((it) => {
+        const split = it.split(',')
+
+        const showId = split[0]
+        const movieId = split[1]
+
+        const isMovie = movieId !== "-1"
+
+        return {
+           isMovie: isMovie,
+           movidId: isMovie ? movieId : showId,
+           url:  split[split.length - 1]
+        }
+    })
+}
+
+export async function getListWithPosters(
+    type:  "select_most_recent_lists_with_poster_items" | "select_most_popular_lists_with_poster_items",
+    limit: number,
+    offset: number,
+) {
+    try {
+        const res = await supabase.rpc(type, { lim: limit, off: offset})
+        .select()
+        return res.data! as ListWithPostersRpcResponse[]
+    } catch{}
+    return null
+}
 
 export function getProfileImageUrl(
     path: string,

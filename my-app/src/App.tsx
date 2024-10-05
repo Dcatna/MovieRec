@@ -81,29 +81,29 @@ function App() {
 
   return (
     <div className="bg-background max-h-screen overflow-hidden flex flex-col">
-      <div className="grid lg:grid-cols-5">
+      <div className="grid grid-cols-5 max-h-screen max-w-screen">
         <Sidebar
           user={user}
           refreshPlaylist={refreshPlaylists}
           playlists={playlists}
           onDeletePlaylist={() =>{}}
-          className="block max-h-screen overflow-hidden"
+          className="hidden lg:block max-h-screen overflow-hidde min-h-screen"
         />
-        <div
-          className={cn(
-            `col-span-3 lg:col-span-4 lg:border-l`,
-            "max-h-[calc(100vh)]"
-          )}
-        >
-          <div
-            ref={scrollAreaRef}
-            className={`h-full overflow-y-auto overflow-x-hidden`}
+            <div
+            className={cn(
+              `col-span-3 lg:col-span-4 lg:border-l`,
+              "max-h-[calc(100vh)]"
+            )}
           >
+                <div
+                    ref={scrollAreaRef}
+                    className={`h-full overflow-y-auto overflow-x-hidden`}
+                >
             <ScrollProvider provideRef={scrollAreaRef}>
               <Outlet />
             </ScrollProvider>
           </div>
-        </div>
+          </div>
       </div>
     </div>
   );
