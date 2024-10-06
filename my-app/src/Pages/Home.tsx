@@ -12,6 +12,8 @@ import {
 import { ListWithItems } from "@/Data/userstore";
 import { cn, range } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
+import { useRef, useState } from "react";
+import { Link } from "react-router-dom";
 
 const DEFAULT_LIST_USER = "c532e5da-71ca-4b4b-b896-d1d36f335149"
 
@@ -80,9 +82,43 @@ function DefaultListListing(
     loading,
     data,
     error,
-  }: DefaultListListingProps
-) {
+  }: DefaultListListingProps) {
+  const [isDragging, setIsDragging] = useState(false); // Track dragging state
+  const scrollRef = useRef<HTMLDivElement>(null); // Reference to the scrollable container
+  const startX = useRef(0); // Initial X position of the mouse
+  const scrollLeft = useRef(0); // Initial scroll position
 
+  // Mouse down event: Start dragging
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    startX.current = e.pageX - scrollRef.current!.offsetLeft; // Get starting X position of mouse
+    scrollLeft.current = scrollRef.current!.scrollLeft; // Get initial scroll position
+    scrollRef.current!.style.cursor = 'grabbing'; // Set cursor style to grabbing
+    e.preventDefault(); // Prevent default text selection behavior
+  };
+
+  // Mouse move event: Scroll when dragging
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return; // Only move if dragging
+    const x = e.pageX - scrollRef.current!.offsetLeft; // Calculate current mouse position
+    const walk = (x - startX.current) * 2; // Determine how much to scroll (multiplier increases sensitivity)
+    scrollRef.current!.scrollLeft = scrollLeft.current - walk; // Update the scroll position of the container
+  };
+
+  // Mouse up event: Stop dragging
+  const handleMouseUp = () => {
+    setIsDragging(false); // Stop dragging
+    scrollRef.current!.style.cursor = 'grab'; // Change cursor back to grab
+  };
+
+  // Mouse leave event: Stop dragging if mouse leaves container
+  const handleMouseLeave = () => {
+    if (isDragging) {
+      setIsDragging(false); // Stop dragging if mouse leaves container
+      scrollRef.current!.style.cursor = 'grab'; // Reset cursor when dragging stops
+    }
+  }
+  
   if (loading) {
     return (
       <ListLoadingElement></ListLoadingElement>
@@ -96,35 +132,40 @@ function DefaultListListing(
   return (
     <div className={className}> 
       {data?.map((list) => (
-        <div className="flex flex-col">
+        <div className="flex flex-col" key={list.name}>
           <div className="flex flex-col">
-          <h1 className="text-3xl font-semibold tracking-tight">
-          {list.name}
-          </h1>
-          <div className="text-sm font-light text-foreground tracking-tight">
-            {list.description}
-          </div>
+            <h1 className="text-3xl font-semibold tracking-tight">
+              {list.name}
+            </h1>
+            <div className="text-sm font-light text-foreground tracking-tight">
+              {list.description}
             </div>
-              <Carousel className="w-full h-full">
-                <CarouselContent>
-                  {list.listitem?.map((item, index) => (
-                    <CarouselItem className={"basis-[1/9] overflow-clip my-4"} key={index}>
-                      <div className="flex flex-col me-2">
-                        <CrossfadeImage 
-                            className="h-56 object-cover aspect-[3/4] rounded-md"
-                            src={item.poster_path?.replace("original", "w200")} 
-                        />
-                        <h2 className="text-xl w-44 line-clamp-2">{item.title}</h2>
-                      </div>
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-                <CarouselPrevious />
-                <CarouselNext />
-            </Carousel>
           </div>
-          ))}
-      </div>
+
+          {/* Scrollable Container */}
+          <div
+            ref={scrollRef} // Reference for the scroll container
+            className="flex flex-row w-full overflow-x-auto"  // Ensure horizontal scroll
+            onMouseDown={handleMouseDown} // Start dragging
+            onMouseMove={handleMouseMove} // Drag to scroll
+            onMouseUp={handleMouseUp} // End dragging
+            onMouseLeave={handleMouseLeave} // End dragging if mouse leaves
+          >
+            {list.listitem?.map((item, index) => (
+              <Link to={"/"}>
+              <div className="flex flex-col me-2" key={index}>
+                <CrossfadeImage 
+                  className="h-56 object-cover aspect-[3/4] rounded-md"
+                  src={item.poster_path?.replace("original", "w200")} 
+                />
+                <h2 className="text-xl w-44 line-clamp-2">{item.title}</h2>
+              </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
   )
 }
 

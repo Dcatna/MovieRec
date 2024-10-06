@@ -4,6 +4,7 @@ import { useUserStore } from "./Data/userstore";
 import { cn } from "./lib/utils";
 import { createContext, useCallback, useContext, useEffect, useRef } from "react";
 import { Sidebar } from "./components/sidbar";
+import Navbar from "./components/Navbar";
 
 const ScrollContext = createContext<{
   ref: React.RefObject<HTMLDivElement>;
@@ -81,8 +82,11 @@ function App() {
   }, [])
 
   return (
+    
     <div className="bg-background max-h-screen overflow-hidden flex flex-col">
+      <Navbar/>
       <div className="grid grid-cols-5 max-h-screen max-w-screen">
+        
         <Sidebar
           signOut={signOut}
           user={user}
