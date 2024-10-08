@@ -2,7 +2,13 @@ import { Outlet } from "react-router-dom";
 import { useShallow } from "zustand/shallow";
 import { useUserStore } from "./Data/userstore";
 import { cn } from "./lib/utils";
-import { createContext, useCallback, useContext, useEffect, useRef } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+} from "react";
 import { Sidebar } from "./components/sidbar";
 import Navbar from "./components/Navbar";
 
@@ -66,50 +72,50 @@ const ScrollProvider: React.FC<{
 };
 
 function App() {
-
   const user = useUserStore(useShallow((state) => state.stored));
   const signOut = useUserStore((state) => state.signOut);
-  const refreshUser = useUserStore(state => state.refreshUser);
+  const refreshUser = useUserStore((state) => state.refreshUser);
   const refreshPlaylists = useUserStore((state) => state.refreshPlaylists);
   const playlists = useUserStore(useShallow((state) => state.playlists));
   const scrollAreaRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    refreshUser()
-    refreshPlaylists()
+    refreshUser();
+    refreshPlaylists();
 
-    console.log(user)
-  }, [])
+    console.log(user);
+  }, []);
 
   return (
-    
-    <div className="bg-background max-h-screen overflow-hidden flex flex-col">
-      <Navbar/>
-      <div className="grid grid-cols-5 max-h-screen max-w-screen">
-        
-        <Sidebar
-          signOut={signOut}
-          user={user}
-          refreshPlaylist={refreshPlaylists}
-          playlists={playlists}
-          onDeletePlaylist={() =>{}}
-          className="hidden lg:block max-h-screen overflow-hidde min-h-screen"
-        />
-            <div
-            className={cn(
-              `col-span-3 lg:col-span-4 lg:border-l`,
-              "max-h-[calc(100vh)]"
-            )}
+    <div className="bg-background max-h-screen flex flex-col">
+      <div className="grid grid-cols-5 flex-grow min-h-0 overflow-hidden">
+        <div className="hidden lg:block max-h-screen">
+          <Sidebar
+            signOut={signOut}
+            user={user}
+            refreshPlaylist={refreshPlaylists}
+            playlists={playlists}
+            onDeletePlaylist={() => {}}
+            className="max-h-screen min-h-screen"
+          />
+        </div>
+
+        <div className="col-span-full lg:col-span-4 lg:border-l flex flex-col overflow-y-auto overflow-x-hidden max-w-screen">
+          <div
+            ref={scrollAreaRef}
+            className="flex flex-col overflow-y-auto overflow-x-hidden"
           >
-                <div
-                    ref={scrollAreaRef}
-                    className={`h-full overflow-y-auto overflow-x-hidden`}
-                >
-            <ScrollProvider provideRef={scrollAreaRef}>
-              <Outlet />
-            </ScrollProvider>
+            <div className="sticky top-0 h-64 z-20 backdrop-blur-md bg-background/50">
+              <Navbar />
+            </div>
+
+            <div className="flex-grow">
+              <ScrollProvider provideRef={scrollAreaRef}>
+                <Outlet />
+              </ScrollProvider>
+            </div>
           </div>
-          </div>
+        </div>
       </div>
     </div>
   );

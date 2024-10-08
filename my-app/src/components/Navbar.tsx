@@ -17,7 +17,7 @@ const Navbar = (props: Props) => {
 
   return (
     <nav>
-        <div className="w-screen flex justify-center items-center">
+        <div className="w-screen flex justify-center items-center bg-transparent">
             <Button asChild variant="ghost">
                 <Link to="/home">Home</Link>
             </Button>

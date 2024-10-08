@@ -53,7 +53,7 @@ export interface TokenBucket {
      *
      * @return `true` if a token was consumed, `false` otherwise.
      */
-    tryConsume(): Promise<Boolean>
+    tryConsume(): Promise<boolean>
 
     /**
      * Attempt to consume a specified number of tokens from the bucket.  If the tokens were consumed then `true`
@@ -62,7 +62,7 @@ export interface TokenBucket {
      * @param numTokens The number of tokens to consume from the bucket, must be a positive number.
      * @return `true` if the tokens were consumed, `false` otherwise.
      */
-    tryConsumeAmount(numTokens: number): Promise<Boolean>
+    tryConsumeAmount(numTokens: number): Promise<boolean>
 
     /**
      * Consume a single token from the bucket.  If no token is currently available then this method will block until a
