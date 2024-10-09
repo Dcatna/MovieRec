@@ -1,17 +1,11 @@
 
-import React, { useContext } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import {Button} from "../components/ui/button";
-import { faBorderAll,faGripLines, faMagnifyingGlass} from '@fortawesome/free-solid-svg-icons'
+import { faMagnifyingGlass} from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { supabaseSignOut } from '../Data/supabase-client';
 import { useUserStore } from '@/Data/userstore';
-import { useShallow } from 'zustand/shallow';
 
-
-type Props = {}
-
-const Navbar = (props: Props) => {
+const Navbar = () => {
     const signOut = useUserStore((state) => state.signOut);
     
 

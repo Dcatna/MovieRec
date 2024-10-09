@@ -2,7 +2,29 @@ export interface Genre {
     id: number;
     name: string;
 }
-
+export interface UserList {
+  list_id: string
+  user_id: string 
+  name: string
+  created_at: string 
+  updated_at: string 
+  public: boolean
+  description: string
+  subscribers: number
+}
+export interface PosterLists {
+  createdAt: string
+  description: string
+  list_id: string
+  name: string
+  public: boolean
+  updatedAt: string
+  userId: string
+  username: string
+  profileImagePath: string | null
+  ids: string[] | null
+  total: number | null
+}
 export type Rating = {
     certification: string,
     meaning: string,
