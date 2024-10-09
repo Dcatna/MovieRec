@@ -21,7 +21,7 @@ import {FixedIntervalRefillStrategy} from "./FixedIntervalRefillStrategy";
 
 const YIELDING_SLEEP_STRATEGY: SleepStrategy = {
     sleep(): Promise<void> {
-       return new Promise( resolve => setTimeout(resolve, 1) );
+       return new Promise(resolve => setTimeout(resolve, 1) );
     }
 }
 
