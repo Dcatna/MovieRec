@@ -105,7 +105,7 @@ function DefaultListListing(
           </div>
 
           {/* Scrollable Container */}
-          <ScrollContainer className="scroll-container flex flex-row w-full overflow-x-auto" hideScrollbars={false}>
+          <ScrollContainer className="scroll-container flex flex-row w-full overflow-x-auto h-max-screen" hideScrollbars={false}>
           {list.listitem?.map((item, index) => (
               <Link to={"/"}>
               <div className="flex flex-col me-2" key={index}>
@@ -116,8 +116,6 @@ function DefaultListListing(
                 <h2 className="text-xl w-44 line-clamp-2">{item.title}</h2>
               </div>
               </Link>
-              
-              
             ))}
           </ScrollContainer>
 

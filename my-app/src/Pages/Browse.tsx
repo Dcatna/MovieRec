@@ -1,3 +1,4 @@
+import { useScrollContext } from "@/App";
 import Moviebox from "@/components/Moviebox";
 import Showbox from "@/components/Showbox";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -33,19 +34,22 @@ const BrowsePage = ({ type }: { type: ResourceType }) => {
       getNextPageParam: (lastPage) => lastPage.page < lastPage.total_pages ? lastPage.page + 1 : undefined,
   });
     
+  const {ref} = useScrollContext()
   
   useEffect(() => {
     const handleScroll = () => {
+        const { scrollTop, scrollHeight, clientHeight } = ref.current!;
         //checking if we are near the bottom of the screen
-        if(window.innerHeight + document.documentElement.scrollTop >= document.documentElement.offsetHeight - 50) {
-            fetchNextPage().catch((e) => alert(e.toLocaleString()))
+         // Checking if the div has been scrolled to the bottom
+         if (scrollHeight - scrollTop <= clientHeight + 1) {
+            fetchNextPage().catch((e) => alert(e.toLocaleString()));
         }
     }
 
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
+    ref.current?.addEventListener('scroll', handleScroll)
+    return () => ref.current?.removeEventListener('scroll', handleScroll)
 
-}, [hasNextPage, isFetchingNextPage, fetchNextPage])
+}, [])
 
 
   const items : SearchResult[] = useMemo(() => {
