@@ -10,6 +10,7 @@ import { HomePage } from "./Pages/Home";
 import App from "./App";
 import { SignInPage, SignUpPage } from "./Pages/SignIn";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import SearchPage from "./Pages/Search";
 import BrowsePage from "./Pages/Browse";
 
 const router = createBrowserRouter([
@@ -23,8 +24,8 @@ const router = createBrowserRouter([
         path: "search",
         children: [
           { index: true, element: <Navigate to="/search/movie"/> },
-          { path: "movie", element: <BrowsePage type="movie" /> },
-          { path: "show", element: <BrowsePage type="tv" /> }
+          { path: "movie", element: <SearchPage type="movie" /> },
+          { path: "show", element: <SearchPage type="tv" /> }
         ],
       },
       {
@@ -35,6 +36,9 @@ const router = createBrowserRouter([
           { path: "create", element: <SignUpPage /> },
         ],
       },
+      {
+        path: 'browse', element: <BrowsePage/>
+      }
     ],
   },
 ]);
