@@ -8,7 +8,7 @@ import {
   useEffect,
   useRef,
 } from "react";
-import { Sidebar } from "./components/sidbar";
+import { Sidebar } from "./components/sidebar";
 import Navbar from "./components/Navbar";
 
 const ScrollContext = createContext<{

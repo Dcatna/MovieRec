@@ -5,6 +5,10 @@ import { cn } from "../lib/utils";
 import { contentFrom, ListWithPostersRpcResponse,selectListsByIdsWithPoster, type StoredUser } from "../Data/supabase-client";
 import { useQuery } from "@tanstack/react-query";
 import { ImageGrid } from "./poster-item";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faGripLinesVertical } from "@fortawesome/free-solid-svg-icons";
+import PopupExample from "./AddListPopup";
+import defualtlist from "./movieicon.png"
 
 export interface SidebarProps extends React.HTMLAttributes<HTMLDivElement>{
   user: StoredUser | null
@@ -31,16 +35,26 @@ export function Sidebar({
   return (
     <div className={cn("pb-12 h-full", className)}>
       <div className="space-y-4 py-4">
-        <button onClick={() => navigate("auth")}>Sign In</button>
+      <div className='flex items-center justify-between'>
+        <div className="flex">
+          <FontAwesomeIcon className='mt-1 size-6' icon={faGripLinesVertical} />
+          <p className='ml-1 text-lg'>Your Library</p>
+        </div>
+        <div className="">
+          <PopupExample/>
+        </div>
+      </div>
         <div className="grid grid-cols-1 gap-4">
           {listQuery?.map((item: ListWithPostersRpcResponse) => (
             <div key={item.list_id} className="flex items-center space-x-4 rounded-lg bg-white shadow-md p-4">
               <div className="w-20 h-20 flex-shrink-0">
-                <ImageGrid images={contentFrom(item).map((it) => it.url)} />
+                {item.ids ? item.ids.length > 3 ? <ImageGrid images={contentFrom(item).map((it) => it.url)} /> : 
+                  <img src={defualtlist}></img> : <img src={defualtlist}></img>}
+                
               </div>
               <div className="flex flex-col">
                 <p className="font-bold text-lg">{item.name}</p>
-                <p className="text-gray-500 text-sm">Created by: {item.user_id}</p>
+                <p className="text-gray-500 text-sm">Created by: {item.username}</p>
               </div>
             </div>
           ))}
