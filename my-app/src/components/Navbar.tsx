@@ -21,9 +21,6 @@ const Navbar = () => {
             <Button asChild variant="ghost" className="rounded-md">
                 <Link to="/recommended">Recommended</Link>
             </Button>
-            <Button  asChild variant="ghost" className="rounded-md">
-                <Link to= "/pool">Pool</Link>
-            </Button>
             <Button variant="ghost" className="rounded-md">
                 <Link to = "/profile">Profile</Link>
             </Button>

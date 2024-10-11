@@ -80,7 +80,7 @@ const BrowsePage = () => {
       </div>
       
       {/* Container for genres */}
-      <div className="flex flex-wrap justify-center gap-2 w-full mx-auto">
+      <div className="flex flex-wrap justify-center gap-2 w-full mx-auto mt-10">
         {genres.map(({ id, name }) => {
           const selected = genreIds.includes(id);
           return (
@@ -100,7 +100,7 @@ const BrowsePage = () => {
   </div>
 
   {/* Movie Grid */}
-  <div className="w-full px-4 md:px-0 py-12 flex justify-center">
+  <div className="w-full px-4 md:px-0 py-5 flex justify-center">
     <div className="grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 gap-6 w-full max-w-6xl px-4">
       {items.map((movie: MovieListResult) => (
         <div key={movie.id} className="flex justify-center">

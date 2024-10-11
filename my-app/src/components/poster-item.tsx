@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 
-const ImageGrid = ({ images }: {images: string[]}) => {
+export const ImageGrid = ({ images }: {images: string[]}) => {
 
     const roundingFromIdx = (idx: number) => {
         switch(idx) {

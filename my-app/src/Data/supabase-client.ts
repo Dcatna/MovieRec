@@ -31,6 +31,8 @@ export type ListWithPostersRpcResponse = {
     total?: number
 }
 
+
+
 export function contentFrom(data: ListWithPostersRpcResponse) {
     return data.ids?.map((it) => {
         const split = it.split(',')
@@ -129,4 +131,18 @@ export async function selectListsByUserId(userId: string): Promise<ListWithItems
         return res.data as ListWithItems[] | null
     } catch(e) {}    
     return null
+}
+
+export async function selectListsByIdsWithPoster(userId: string | undefined): Promise<ListWithPostersRpcResponse[]>{
+    if (userId == undefined)
+        return []
+
+    const {data} = await supabase.rpc(
+        "select_lists_with_poster_items_for_user_id",
+        {
+            uid: userId,
+            lim: 9999,
+            off: 0
+        })
+    return data as unknown as ListWithPostersRpcResponse[]
 }

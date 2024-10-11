@@ -87,9 +87,11 @@ function App() {
 
   return (
     <div className="bg-background max-h-screen flex flex-col">
+
       <div className="sticky top-0 h-64 z-20 backdrop-blur-md bg-background/50">
         <Navbar />
       </div>
+
       <div className="grid grid-cols-5 flex-grow min-h-0 overflow-hidden">
         <div className="hidden lg:block max-h-screen">
           <Sidebar
