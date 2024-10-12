@@ -10,6 +10,7 @@ import {
 } from "react";
 import { Sidebar } from "./components/sidebar";
 import Navbar from "./components/Navbar";
+import { RefreshProvider } from "./components/RefreshContext";
 
 const ScrollContext = createContext<{
   ref: React.RefObject<HTMLDivElement>;
@@ -86,6 +87,7 @@ function App() {
   }, []);
 
   return (
+    <RefreshProvider>
     <div className="bg-background max-h-screen flex flex-col">
 
       <div className="sticky top-0 h-64 z-20 backdrop-blur-md bg-background/50">
@@ -120,6 +122,7 @@ function App() {
         </div>
       </div>
     </div>
+    </RefreshProvider>
   );
 }
 
