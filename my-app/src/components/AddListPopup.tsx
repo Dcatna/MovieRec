@@ -15,7 +15,11 @@ const PopupExample = () => {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault(); // Prevent the default form submission behavior
     console.log(client?.user_id);
-    const { data, error } = await supabase
+    if (name == "") {
+      return 
+    }
+    else{
+      const { data, error } = await supabase
       .from("userlist")
       .insert([{ name: name, user_id: client?.user_id }]);
     
@@ -26,6 +30,8 @@ const PopupExample = () => {
       setName(""); // Clear the input field
       setShouldRefresh(true); // Set the flag to refresh the lists in Sidebar
     }
+    }
+    
   };
 
   return (

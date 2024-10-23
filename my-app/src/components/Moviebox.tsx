@@ -11,11 +11,12 @@ import { supabase } from '@/Data/supabase-client';
 export interface movieBoxProp {
     movie_id : number,
     title: string,
-    posterpath: string
+    posterpath: string,
+    item : MovieListResult
     //movie_id : string | undefined
 }
 
-const Moviebox = ({movie_id, title, posterpath} : movieBoxProp) => {
+const Moviebox = ({movie_id, title, posterpath, item} : movieBoxProp) => {
     const partial_url = "https://image.tmdb.org/t/p/original/"
     const client = useUserStore(useShallow((state) => state.stored));
     const [loaded, setLoaded] = useState(false)
@@ -60,7 +61,7 @@ const Moviebox = ({movie_id, title, posterpath} : movieBoxProp) => {
             </div>
             
         )}
-        <Link to={'/info'} state={{ movie_id, title, posterpath }}>
+        <Link to={'/movieinfo'} state={{ item }}>
             <div className="relative">
                 <img
                     onLoad={() => { setLoaded(true) }}

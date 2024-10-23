@@ -88,9 +88,9 @@ function App() {
 
   return (
     <RefreshProvider>
-    <div className="bg-background max-h-screen flex flex-col">
+    <div className="bg-background min-h-screen flex flex-col">
 
-      <div className="sticky top-0 h-64 z-20 backdrop-blur-md bg-background/50">
+      <div className="sticky top-0 h-16 z-20 ">
         <Navbar />
       </div>
 

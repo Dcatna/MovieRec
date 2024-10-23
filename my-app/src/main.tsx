@@ -12,6 +12,8 @@ import { SignInPage, SignUpPage } from "./Pages/SignIn";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import SearchPage from "./Pages/Search";
 import BrowsePage from "./Pages/Browse";
+import MovieInfo from "./components/MovieInfo";
+import ShowInfo from "./components/ShowInfo";
 
 const router = createBrowserRouter([
   {
@@ -38,6 +40,12 @@ const router = createBrowserRouter([
       },
       {
         path: 'browse', element: <BrowsePage/>
+      },
+      {
+        path: "movieinfo", element: <MovieInfo/>
+      },
+      {
+        path: "showinfo", element: <ShowInfo/>
       }
     ],
   },

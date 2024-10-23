@@ -12,10 +12,11 @@ export interface showBoxProp {
     show_id : number,
     title: string,
     posterpath: string
+    item : ShowListResult
     //movie_id : string | undefined
 }
 
-const Showbox = ({show_id, title, posterpath} : showBoxProp) => {
+const Showbox = ({show_id, title, posterpath, item} : showBoxProp) => {
     const partial_url = "https://image.tmdb.org/t/p/original/"
     const client = useUserStore(useShallow((state) => state.stored))
 
@@ -57,7 +58,7 @@ const Showbox = ({show_id, title, posterpath} : showBoxProp) => {
                 </button>
                 
             </div>
-            <Link to={'/showinfo'} state={{show_id, title, posterpath}}>
+            <Link to={'/showinfo'} state={{item}}>
             <div className='relative'>
                 <img
                     className="w-full h-full rounded-md animate-in"
