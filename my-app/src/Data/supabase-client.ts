@@ -1,6 +1,6 @@
-import { createClient, Session, SupabaseClient, User } from '@supabase/supabase-js'
+import { createClient, Session, User } from '@supabase/supabase-js'
 import { Database } from './supabase'
-import { ListWithItems } from './userstore';
+import { ListItem, ListWithItems } from './userstore';
 
 // Create a single supabase client for interacting with your database
 export const supabase = createClient<Database>(
@@ -145,4 +145,31 @@ export async function selectListsByIdsWithPoster(userId: string | undefined): Pr
             off: 0
         })
     return data as unknown as ListWithPostersRpcResponse[]
+}
+
+export async function selectListByListIDwithPoster(listId: string): Promise<ListWithPostersRpcResponse> {
+    const { data, error } = await supabase.rpc("select_lists_by_ids_with_poster", {
+        list_ids: `{${listId}}`// Pass as an array
+    })
+
+    if (error) {
+        console.error("Supabase RPC error:", error)
+        throw new Error("Network response was not ok: " + error.message)
+    } else {
+        return data as unknown as ListWithPostersRpcResponse
+    }
+}
+
+
+
+export async function selectListByID(listID : string) : Promise<ListItem[] | null> {
+    const {data, error} = await supabase.from("listitem").select("*").eq("list_id", listID)
+    if (error) {
+        console.log(error)
+        return null
+    }else {
+
+        return data as unknown as ListItem[]
+    }
+
 }

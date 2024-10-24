@@ -14,6 +14,7 @@ import SearchPage from "./Pages/Search";
 import BrowsePage from "./Pages/Browse";
 import MovieInfo from "./components/MovieInfo";
 import ShowInfo from "./components/ShowInfo";
+import ListPreview from "./components/ListPreview";
 
 const router = createBrowserRouter([
   {
@@ -26,8 +27,8 @@ const router = createBrowserRouter([
         path: "search",
         children: [
           { index: true, element: <Navigate to="/search/movie"/> },
-          { path: "movie", element: <SearchPage type="movie" /> },
-          { path: "show", element: <SearchPage type="tv" /> }
+          { path: "movie", element: <SearchPage /> },
+          { path: "show", element: <SearchPage /> }
         ],
       },
       {
@@ -46,6 +47,9 @@ const router = createBrowserRouter([
       },
       {
         path: "showinfo", element: <ShowInfo/>
+      },
+      {
+        path:"home/list/:listId", element: <ListPreview/>
       }
     ],
   },

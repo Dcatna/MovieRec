@@ -1,11 +1,10 @@
 import React, {useState} from 'react'
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faStar, faMinusCircle} from '@fortawesome/free-solid-svg-icons'
+import { faStar} from '@fortawesome/free-solid-svg-icons'
 import { useUserStore } from '@/Data/userstore';
 import { useShallow } from 'zustand/shallow';
 import { MovieListResult } from '@/types/MovieListResponse';
-import { UserList } from '@/types/types';
 import { supabase } from '@/Data/supabase-client';
 
 export interface movieBoxProp {
@@ -23,7 +22,7 @@ const Moviebox = ({movie_id, title, posterpath, item} : movieBoxProp) => {
     async function handleFavorites(event: React.MouseEvent, movie_id : number, title : string, posterpath: string) {
         event.preventDefault(); // Prevent link navigation
         event.stopPropagation();
-        const {data, error} = await supabase.from("favoritemovies").select("*").eq("movie_id", movie_id)
+        const {data} = await supabase.from("favoritemovies").select("*").eq("movie_id", movie_id)
         console.log(data)
         if(data?.length == 0) {
             const {data, error} = await supabase.from("favoritemovies").insert([{

@@ -9,6 +9,7 @@ import { faGripLinesVertical } from "@fortawesome/free-solid-svg-icons";
 import PopupExample from "./AddListPopup";
 import { useRefresh } from './RefreshContext'; // Import your context hook
 import defualtlist from "./movieicon.png";
+import { Link } from "react-router-dom";
 
 export interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
   user: StoredUser | null;
@@ -51,8 +52,13 @@ export function Sidebar({
           </div>
         </div>
         <div className="grid grid-cols-1 gap-4">
-          {listData?.map((item: ListWithPostersRpcResponse) => (
-            <div key={item.list_id} className="flex items-center space-x-4 rounded-lg bg-white shadow-md p-4">
+        {listData?.map((item: ListWithPostersRpcResponse) => (
+          <Link 
+            to={`/home/list/${item.list_id}`} 
+            state={{ item }} 
+            key={item.list_id}  // Added key here
+          >
+            <div className="flex items-center space-x-4 rounded-lg bg-white shadow-md p-4">
               <div className="w-20 h-20 flex-shrink-0">
                 {item.ids && item.ids.length > 3 ? (
                   <ImageGrid images={contentFrom(item).map((it) => it.url)} />
@@ -65,7 +71,8 @@ export function Sidebar({
                 <p className="text-gray-500 text-sm">Created by: {item.username}</p>
               </div>
             </div>
-          ))}
+          </Link>
+        ))}
         </div>
       </div>
     </div>

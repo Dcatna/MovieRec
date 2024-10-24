@@ -3,7 +3,7 @@ import Moviebox from "@/components/Moviebox";
 import TMDBCClient from "@/Data/TMDB-fetch";
 import { MovieListResult, ResourceType } from "@/types/MovieListResponse";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useState, useContext, useRef, useEffect, useMemo } from "react";
+import { useState,useEffect, useMemo } from "react";
 import genreData from "../Data/genres.json"
 import { Badge } from "@/components/ui/Badge";
 
@@ -19,7 +19,6 @@ const BrowsePage = () => {
     const client = new TMDBCClient()
     const [searchState, setSearchState] = useState<ResourceType>("movie")
     const genres = genreData.genres as Genre[]
-    const movieListRef = useRef(null);
 
     const handleFilterButtons = (filter : number) => {
         setGenreIds((prevFilters : number[]) =>
@@ -31,7 +30,7 @@ const BrowsePage = () => {
 
     
 
-    const { data, fetchNextPage, isFetchingNextPage, hasNextPage } = useInfiniteQuery({
+    const { data, fetchNextPage} = useInfiniteQuery({
         queryKey: ['trendingMovies', genreIds, searchState],
         queryFn: ({ pageParam = 1}) => client.fetchMovieList(pageParam, searchState, genreIds),
     
@@ -104,7 +103,7 @@ const BrowsePage = () => {
     <div className="grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 gap-6 w-full max-w-6xl px-4">
       {items.map((movie: MovieListResult) => (
         <div key={movie.id} className="flex justify-center">
-          <Moviebox movie_id={movie.id} title={movie.title} posterpath={movie.poster_path} />
+          <Moviebox movie_id={movie.id} title={movie.title} posterpath={movie.poster_path} item={movie}/>
         </div>
       ))}
     </div>

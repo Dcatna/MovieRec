@@ -1,12 +1,10 @@
 import TMDBCClient from "@/Data/TMDB-fetch";
-import { useUserStore } from "@/Data/userstore";
 import { MovieTrailer } from "@/types/MovieListResponse";
-import { Cast, SimilarMovie, Credit, SimilarMovieResult } from "@/types/types";
+import { Cast, Credit} from "@/types/types";
 import { faPlay } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState, useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
-import { useShallow } from "zustand/shallow";
 import { movieBoxProp } from "./Moviebox";
 import ActorBox from "./ActorBox";
 
@@ -25,13 +23,12 @@ export type userType = {
   uid : string | undefined,
 }
 const MovieInfo = () => {
-    const client = useUserStore(useShallow((state) => state.stored));
     const location = useLocation()
     const movie : movieBoxProp = location.state
     const tmdbclient = new TMDBCClient()
     const [videoData, setVideoData] = useState<MovieTrailer>()
     const [actors, setActors] = useState<Cast[]>()
-    const [similarMovies, setSimilarMovies] = useState<SimilarMovie[]>()
+    // const [similarMovies, setSimilarMovies] = useState<SimilarMovie[]>()
     // const [comments, setComments] = useState<CommentWithReply[]>([])
 
     async function fetchMovieTrailer() {
@@ -46,17 +43,17 @@ const MovieInfo = () => {
       const credits : Credit = await cred
       setActors(credits.cast)
     }
-    async function fetchSimilarMovies() {
-      const res : Promise<SimilarMovieResult> = tmdbclient.fetchSimilarMovie(movie.item.id)
-      const movies : SimilarMovieResult = await res
-      const convertedMovies = movies.results.map(similarMovie => ({
-        ...similarMovie,
-        media_type: 'movie', // Assuming 'movie' as default for conversion
-        backdrop_path: similarMovie.backdrop_path || '', // Ensuring value is not undefined
-        poster_path: similarMovie.poster_path || '', // Ensuring value is not undefined
-      }));
-      setSimilarMovies(convertedMovies)
-    }
+    // async function fetchSimilarMovies() {
+    //   const res : Promise<SimilarMovieResult> = tmdbclient.fetchSimilarMovie(movie.item.id)
+    //   const movies : SimilarMovieResult = await res
+    //   const convertedMovies = movies.results.map(similarMovie => ({
+    //     ...similarMovie,
+    //     media_type: 'movie', // Assuming 'movie' as default for conversion
+    //     backdrop_path: similarMovie.backdrop_path || '', // Ensuring value is not undefined
+    //     poster_path: similarMovie.poster_path || '', // Ensuring value is not undefined
+    //   }));
+    //   setSimilarMovies(convertedMovies)
+    // }
     // async function getComments() {
     //   console.log(client2?.user.id, "USERS")
     //    const data = await commentWithReply(client?.user.id, movie.item.id, -1)
@@ -67,7 +64,7 @@ const MovieInfo = () => {
     useEffect(() => {
         fetchMovieTrailer()
         fetchCredits()
-        fetchSimilarMovies()
+        // fetchSimilarMovies()
         // getComments().catch()
     }, [movie])
 
@@ -149,37 +146,37 @@ function VideoComponent({videoKey} : video) {
       </iframe>
     );
   }
-  interface similarProp {
-    item : SimilarMovie
-  }
-  const SimilarBox = ({item} : similarProp) => {
-    const partial_url = "https://image.tmdb.org/t/p/original/"
+//   interface similarProp {
+//     item : SimilarMovie
+//   }
+//   const SimilarBox = ({item} : similarProp) => {
+//     const partial_url = "https://image.tmdb.org/t/p/original/"
    
-    const [loaded, setLoaded] = useState(false)
+//     const [loaded, setLoaded] = useState(false)
 
-    return (
-        <div className="relative group">
-        <Link to={'/info'} state={{ item }}>
-            <div className="relative">
-                <img
-                    onLoad={() => { setLoaded(true) }}
-                    className="w-full h-full rounded-md animate-in"
-                    src={partial_url + item.poster_path}
-                    alt="Movie Poster"
-                />
-                <div className="rounded-md absolute bottom-0 left-0 bg-gradient-to-t from-black to-transparent w-full h-4/6"/>
-                <div className="rounded-md absolute bottom-0 left-0 h-full w-full hover:bg-gradient-to-t from-slate-900 to-transparent bg-transparent"/>
-                {loaded && (
-                    <text className="rounded-md line-clamp-2 absolute bottom-0 left-0 m-2 group-hover:animate-bounce">
-                        {item.title}
-                    </text>
-                )}
-            </div>
-        </Link>
-    </div>
+//     return (
+//         <div className="relative group">
+//         <Link to={'/info'} state={{ item }}>
+//             <div className="relative">
+//                 <img
+//                     onLoad={() => { setLoaded(true) }}
+//                     className="w-full h-full rounded-md animate-in"
+//                     src={partial_url + item.poster_path}
+//                     alt="Movie Poster"
+//                 />
+//                 <div className="rounded-md absolute bottom-0 left-0 bg-gradient-to-t from-black to-transparent w-full h-4/6"/>
+//                 <div className="rounded-md absolute bottom-0 left-0 h-full w-full hover:bg-gradient-to-t from-slate-900 to-transparent bg-transparent"/>
+//                 {loaded && (
+//                     <text className="rounded-md line-clamp-2 absolute bottom-0 left-0 m-2 group-hover:animate-bounce">
+//                         {item.title}
+//                     </text>
+//                 )}
+//             </div>
+//         </Link>
+//     </div>
     
-    )
-}
+//     )
+// }
 
 
 export default MovieInfo

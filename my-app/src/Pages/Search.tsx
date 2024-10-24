@@ -3,24 +3,21 @@ import Moviebox from "@/components/Moviebox";
 import Showbox from "@/components/Showbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import TMDBCClient from "@/Data/TMDB-fetch";
-import { useUserStore } from "@/Data/userstore";
 import { MovieListResult, ResourceType, ShowListResult } from "@/types/MovieListResponse";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-import { shallow, useShallow } from "zustand/shallow";
 
 
 type SearchResult = MovieListResult | ShowListResult;
 
-const SearchPage = ({ type }: { type: ResourceType }) => {
+const SearchPage = () => {
   const [currSearch, setCurrSearch] = useState<string>("")
     const [searchState, setSearchState] = useState<ResourceType>("movie")
     const [searching, setSearching] = useState<boolean>(false)
     //const client = useUserStore(useShallow((state) => state.stored))
     const tmdbclient = new TMDBCClient()
-    const [query, setQuery] = useState<string>('')
 
-    const { data, fetchNextPage, isFetchingNextPage, hasNextPage } = useInfiniteQuery({
+    const { data, fetchNextPage } = useInfiniteQuery({
       queryKey: ['search', currSearch, searchState],
       queryFn: async ({ pageParam = 1 }) => {
           if (currSearch !== "") {

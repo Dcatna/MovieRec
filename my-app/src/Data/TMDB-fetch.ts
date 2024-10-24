@@ -1,6 +1,6 @@
 import { TokenBucket } from "@/ratelimit/TokenBucket";
 import { TokenBuckets } from "@/ratelimit/TokenBuckets";
-import { MovieListResponse, MovieTrailer, ResourceType, ShowListResponse, SortType } from "@/types/MovieListResponse";
+import { MovieListResponse, MovieListResult, MovieTrailer, ResourceType, ShowListResponse, ShowListResult, SortType } from "@/types/MovieListResponse";
 import { buildUrl } from "./query";
 import { Credit, SimilarMovieResult } from "@/types/types";
 
@@ -33,7 +33,7 @@ class TMDBCClient {
         page: number,
         type: ResourceType,
         with_genres : number[],
-        region: string | undefined = undefined,
+        // region: string | undefined = undefined,
         language: string | undefined = "en-US",
         sort_by : SortType = undefined,
         include_adult : boolean | undefined = true,
@@ -121,7 +121,7 @@ class TMDBCClient {
         page: number,
         type: ResourceType,
         with_genres : number[],
-        with_actors : string[],
+        // with_actors : string[],
         language: string | undefined = "en-US",
         sort_by : SortType = "popularity.desc",
         include_adult : boolean | undefined = true,
@@ -160,7 +160,7 @@ class TMDBCClient {
         page: number,
         type: ResourceType,
         with_genres : number[],
-        region: string | undefined = undefined,
+        // region: string | undefined = undefined,
         language: string | undefined = "en-US",
         sort_by : SortType = undefined,
         include_adult : boolean | undefined = true,
@@ -356,7 +356,30 @@ class TMDBCClient {
         this.controller.abort();
         this.controller = new AbortController()
     }
+    async fetchMovieByID(
+        movie_id : number,
+    ) : Promise<MovieListResult>{
+        const signal = this.controller.signal
 
+        const url = buildUrl(`${this.BASE_URL}/movie/${movie_id}`, [this.apiKeyParam])
+        const res = await this.fetchWithTimeout(url, signal);
+        if (!res.ok) {
+            throw new Error("Network response as not ok")
+        }
+        return await res.json() as MovieListResult
+    }
+    async fetchShowByID(
+        show_id : number,
+    ) : Promise<ShowListResult>{
+        const signal = this.controller.signal
+
+        const url = buildUrl(`${this.BASE_URL}/movie/${show_id}`, [this.apiKeyParam])
+        const res = await this.fetchWithTimeout(url, signal);
+        if (!res.ok) {
+            throw new Error("Network response as not ok")
+        }
+        return await res.json() as ShowListResult
+    }
 
     fetchWithTimeout = async (url: string, signal: AbortSignal) => {
 

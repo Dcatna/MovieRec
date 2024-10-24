@@ -1,10 +1,9 @@
-import React, { useContext } from 'react'
+import React from 'react'
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faStar, faMinusCircle} from '@fortawesome/free-solid-svg-icons'
+import { faStar} from '@fortawesome/free-solid-svg-icons'
 import { ShowListResult } from '@/types/MovieListResponse';
 import { supabase } from '@/Data/supabase-client';
-import { UserList } from '@/types/types';
 import { useUserStore } from '@/Data/userstore';
 import { useShallow } from 'zustand/shallow';
 
@@ -23,7 +22,7 @@ const Showbox = ({show_id, title, posterpath, item} : showBoxProp) => {
     async function handleFavorites(event: React.MouseEvent, show_id : number, title: string, posterpath: string) {
         event.preventDefault(); // Prevent link navigation
         event.stopPropagation();
-        const {data, error} = await supabase.from("favoritemovies").select("*").eq("show_id", show_id)
+        const {data} = await supabase.from("favoritemovies").select("*").eq("show_id", show_id)
         console.log(data)
         if(data?.length == 0) {
             const {data, error} = await supabase.from("favoritemovies").insert([{
