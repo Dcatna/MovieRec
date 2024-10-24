@@ -7,16 +7,22 @@ import { Link, useLocation } from "react-router-dom"
 import ActorBox from "./ActorBox"
 import { showBoxProp } from "./Showbox"
 import TMDBCClient from "@/Data/TMDB-fetch"
+import { selectListsByUserId, addToListByID } from "@/Data/supabase-client"
+import { useUserStore, ListWithItems } from "@/Data/userstore"
+import { useShallow } from "zustand/shallow"
 
 const partial_url = "https://image.tmdb.org/t/p/original/"
 
 const Showinfo = () => {
+    const client = useUserStore(useShallow((state) => state.stored));
 
     const location = useLocation()
     const show : showBoxProp = location.state
     const tmdbclient = new TMDBCClient()
     const [videoData, setVideoData] = useState<MovieTrailer>()
     const [actors, setActors] = useState<Cast[]>()
+    const [userLists, setUserLists] = useState<ListWithItems[]>()
+
     // const [similarMovies, setSimilarMovies] = useState<SimilarMovie[]>()
     // const [comments, setComments] = useState<CommentWithReply[]>([])
 
@@ -48,9 +54,19 @@ const Showinfo = () => {
     //     setComments(data as CommentWithReply[]);
       
     // }
+    async function getUserLists(){
+      if (client?.user_id){
+        const lists = await selectListsByUserId(client?.user_id)
+        setUserLists(lists as ListWithItems[])
+
+      }else{
+        console.log("user not logged in")
+      }
+    }
     useEffect(() => {
 
         fetchCredits()
+        getUserLists()
         // fetchSimilarShows()
         fetchShowTrailer()
         // getComments().catch()
@@ -59,11 +75,46 @@ const Showinfo = () => {
     // const addNewComment = (newComment : commentType) => {
     //   setComments(prevComments => [newComment, ...prevComments]);
     // }
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+    const toggleDropdown = () => {
+      setIsDropdownOpen(!isDropdownOpen);
+    };
   return (
     <div className='overflow-x-hidden overflow-y-auto'>
-    <div className='fixed right-4 top-4 z-50'>
-        {/* <MovieBoxPopup movie={undefined} show={show}/> */}
-      </div>
+    <div className="fixed right-4 top-4 z-50">
+          <div className="relative">
+            <button
+              onClick={toggleDropdown}
+              className="bg-gray-500 text-white font-semibold py-2 px-4 rounded inline-flex items-center"
+            >
+              <span>Add to List</span>
+              <svg
+                className="fill-current h-4 w-4 ml-2"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+              >
+                <path d="M5.292 7.293a1 1 0 011.415 0L10 10.586l3.293-3.293a1 1 0 011.415 1.414l-4 4a1 1 0 01-1.415 0l-4-4a1 1 0 010-1.414z" />
+              </svg>
+            </button>
+            {isDropdownOpen && (
+              <ul className="dropdown-menu absolute text-gray-700 pt-1 bg-white shadow-lg z-50">
+                {userLists?.map((list) => (
+                  <li
+                    key={list.list_id}
+                    onClick={() => {
+                      addToListByID(list.list_id, undefined, show, client);
+                      alert(`Added "${show.item.name}" to ${list.name}`);
+                    }}
+                    className="cursor-pointer hover:bg-gray-200 py-2 px-4 block whitespace-no-wrap transition-colors duration-200"
+                  >
+                    {list.name}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
     <div className='relative mt-10 ml-10 flex'>
       <div className="absolute inset-0 bg-cover bg-center z-0" style={{ backgroundImage: `url(https://image.tmdb.org/t/p/original/${show.item.poster_path})` }}></div>
         <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent z-10"></div>

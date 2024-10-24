@@ -1,6 +1,8 @@
 import { createClient, Session, User } from '@supabase/supabase-js'
 import { Database } from './supabase'
 import { ListItem, ListWithItems } from './userstore';
+import { showBoxProp } from '@/components/Showbox';
+import { movieBoxProp } from '@/components/Moviebox';
 
 // Create a single supabase client for interacting with your database
 export const supabase = createClient<Database>(
@@ -173,3 +175,39 @@ export async function selectListByID(listID : string) : Promise<ListItem[] | nul
     }
 
 }
+
+export async function addToListByID(listID : string, movie: movieBoxProp | undefined, show: showBoxProp | undefined, client : StoredUser | null) {
+    if (show === undefined) {
+        const {data, error} = await supabase.from("listitem").insert({
+            "list_id" : listID,
+            "movie_id" : movie!!.item.id,
+            "show_id" : -1,
+            "user_id" : client?.user_id,
+            "poster_path" : movie?.item.poster_path.slice(1, movie.item.poster_path.length),
+            "title" : movie?.item.title,
+            "description" : movie?.item.overview,
+         
+        })
+        if(error) {
+            console.log(error)
+        }else{
+            return data
+        }
+    }else{
+        const {data, error} = await supabase.from("listitem").insert({
+            "list_id" : listID,
+            "movie_id" : -1,
+            "show_id" : show.item.id,
+            "user_id" : client?.user_id,
+            "poster_path" : show.item.poster_path.slice(1, show.item.poster_path.length),
+            "title" : show.item.name,
+            "description" : show.item.overview,
+        })
+        if(error) {
+            console.log(error)
+        }else{
+            return data
+        }
+    }
+    
+}   

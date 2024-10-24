@@ -7,6 +7,9 @@ import { useState, useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { movieBoxProp } from "./Moviebox";
 import ActorBox from "./ActorBox";
+import { addToListByID, selectListsByUserId, StoredUser } from "@/Data/supabase-client";
+import { ListWithItems, useUserStore } from "@/Data/userstore";
+import { useShallow } from "zustand/shallow";
 
 
 const partial_url = "https://image.tmdb.org/t/p/original/"
@@ -23,6 +26,8 @@ export type userType = {
   uid : string | undefined,
 }
 const MovieInfo = () => {
+    const client = useUserStore(useShallow((state) => state.stored));
+
     const location = useLocation()
     const movie : movieBoxProp = location.state
     const tmdbclient = new TMDBCClient()
@@ -30,6 +35,7 @@ const MovieInfo = () => {
     const [actors, setActors] = useState<Cast[]>()
     // const [similarMovies, setSimilarMovies] = useState<SimilarMovie[]>()
     // const [comments, setComments] = useState<CommentWithReply[]>([])
+    const [userLists, setUserLists] = useState<ListWithItems[]>()
 
     async function fetchMovieTrailer() {
         const video_response: Promise<MovieTrailer> = tmdbclient.fetchMovieTrailer(movie.item.id);
@@ -43,27 +49,21 @@ const MovieInfo = () => {
       const credits : Credit = await cred
       setActors(credits.cast)
     }
-    // async function fetchSimilarMovies() {
-    //   const res : Promise<SimilarMovieResult> = tmdbclient.fetchSimilarMovie(movie.item.id)
-    //   const movies : SimilarMovieResult = await res
-    //   const convertedMovies = movies.results.map(similarMovie => ({
-    //     ...similarMovie,
-    //     media_type: 'movie', // Assuming 'movie' as default for conversion
-    //     backdrop_path: similarMovie.backdrop_path || '', // Ensuring value is not undefined
-    //     poster_path: similarMovie.poster_path || '', // Ensuring value is not undefined
-    //   }));
-    //   setSimilarMovies(convertedMovies)
-    // }
-    // async function getComments() {
-    //   console.log(client2?.user.id, "USERS")
-    //    const data = await commentWithReply(client?.user.id, movie.item.id, -1)
-    //     setComments(data as CommentWithReply[]);
-      
-    // }
-   
+
+    async function getUserLists(){
+      if (client?.user_id){
+        const lists = await selectListsByUserId(client?.user_id)
+        setUserLists(lists as ListWithItems[])
+
+      }else{
+        console.log("user not logged in")
+      }
+    }
+
     useEffect(() => {
         fetchMovieTrailer()
         fetchCredits()
+        getUserLists()
         // fetchSimilarMovies()
         // getComments().catch()
     }, [movie])
@@ -71,12 +71,52 @@ const MovieInfo = () => {
     // const addNewComment = (newComment : CommentWithReply) => {
     //   setComments(prevComments => [newComment, ...prevComments]);
     // }
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const toggleDropdown = () => {
+    setIsDropdownOpen(!isDropdownOpen);
+  };
+  // const handleListSelection = (listID : string, movie: movieBoxProp, show : undefined, client : StoredUser | null) => {
+  //   const res = 
+
+  //   return res
     
+  // };
   return (
     <div className='overflow-x-hidden overflow-y-auto'>
-      <div className='fixed right-4 top-4 z-50'>
-        {/* <MovieBoxPopup movie={movie} show={undefined}/> */}
-      </div>
+       <div className="fixed right-4 top-4 z-50">
+          <div className="relative">
+            <button
+              onClick={toggleDropdown}
+              className="bg-gray-500 text-white font-semibold py-2 px-4 rounded inline-flex items-center"
+            >
+              <span>Add to List</span>
+              <svg
+                className="fill-current h-4 w-4 ml-2"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+              >
+                <path d="M5.292 7.293a1 1 0 011.415 0L10 10.586l3.293-3.293a1 1 0 011.415 1.414l-4 4a1 1 0 01-1.415 0l-4-4a1 1 0 010-1.414z" />
+              </svg>
+            </button>
+            {isDropdownOpen && (
+              <ul className="dropdown-menu absolute text-gray-700 pt-1 bg-white shadow-lg z-50">
+                {userLists?.map((list) => (
+                  <li
+                    key={list.list_id}
+                    onClick={() => {
+                      addToListByID(list.list_id, movie, undefined, client);
+                      alert(`Added "${movie.item.title}" to ${list.name}`);
+                    }}
+                    className="cursor-pointer hover:bg-gray-200 py-2 px-4 block whitespace-no-wrap transition-colors duration-200"
+                  >
+                    {list.name}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
       <div className='relative mt-10 ml-10 flex' >
         <div className="absolute inset-0 bg-cover bg-center z-0" style={{ backgroundImage: `url(https://image.tmdb.org/t/p/original/${movie.item.poster_path})` }}></div>
           <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent z-10"></div>

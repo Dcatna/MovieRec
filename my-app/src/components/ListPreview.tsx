@@ -59,15 +59,16 @@ const ListPreview = () => {
                 console.error("Error fetching list items: ", error);
             }
         };
-    
+        setMovies([])
+        setShows([])
         getLists();
-    }, [listId]);
+    }, [listId, lst]);
     
   return (
-<div className="flex flex-col items-start p-8 bg-white shadow-md rounded-lg w-3/4 mx-auto">
+<div className="flex flex-col items-start p-8 bg-white shadow-md rounded-lg mx-auto">
   <div className="flex items-center justify-between w-full mb-8">
     <div className="w-40 h-40 flex-shrink-0 relative">
-      {lst && lst.ids.length > 0 ? (
+      {lst && lst.ids ? (
         <ImageGrid images={contentFrom(lst).map((it) => it.url)} />
       ) : (
         <img
