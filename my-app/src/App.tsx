@@ -94,7 +94,7 @@ function App() {
         <Navbar />
       </div>
 
-      <div className="grid grid-cols-5 flex-grow min-h-0 overflow-hidden">
+      <div className="grid grid-cols-5 flex-grow min-h-0 ">
         <div className="hidden lg:block max-h-screen">
           <Sidebar
             signOut={signOut}

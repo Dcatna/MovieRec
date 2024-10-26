@@ -2,7 +2,7 @@ import { TokenBucket } from "@/ratelimit/TokenBucket";
 import { TokenBuckets } from "@/ratelimit/TokenBuckets";
 import { MovieListResponse, MovieListResult, MovieTrailer, ResourceType, ShowListResponse, ShowListResult, SortType } from "@/types/MovieListResponse";
 import { buildUrl } from "./query";
-import { Credit, SimilarMovieResult } from "@/types/types";
+import { Credit, ShowDetailResponse, SimilarMovieResult } from "@/types/types";
 
 class TMDBCClient {
 
@@ -370,15 +370,15 @@ class TMDBCClient {
     }
     async fetchShowByID(
         show_id : number,
-    ) : Promise<ShowListResult>{
+    ) : Promise<ShowDetailResponse>{
         const signal = this.controller.signal
 
-        const url = buildUrl(`${this.BASE_URL}/movie/${show_id}`, [this.apiKeyParam])
+        const url = buildUrl(`${this.BASE_URL}/tv/${show_id}`, [this.apiKeyParam])
         const res = await this.fetchWithTimeout(url, signal);
         if (!res.ok) {
             throw new Error("Network response as not ok")
         }
-        return await res.json() as ShowListResult
+        return await res.json() as ShowDetailResponse
     }
 
     fetchWithTimeout = async (url: string, signal: AbortSignal) => {

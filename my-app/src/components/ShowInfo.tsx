@@ -104,7 +104,7 @@ const Showinfo = () => {
                     key={list.list_id}
                     onClick={() => {
                       addToListByID(list.list_id, undefined, show, client);
-                      alert(`Added "${show.item.name}" to ${list.name}`);
+                      alert(`Added "${show.item.title}" to ${list.name}`);
                     }}
                     className="cursor-pointer hover:bg-gray-200 py-2 px-4 block whitespace-no-wrap transition-colors duration-200"
                   >
@@ -121,7 +121,7 @@ const Showinfo = () => {
         <div className='z-20 flex items-center p-10'>
           <img className="h-96 w-auto object-cover" src={partial_url + show.item.poster_path} alt="" />
           <div className='ml-10 text-white'>
-            <p className="text-2xl">{show.item.name}</p>
+            <p className="text-2xl">{show.item.title}</p>
             <p className='mt-5'>{show.item.vote_average}</p>
             <p className='mt-5'>Overview</p>
             <p >{show.item.overview}</p>

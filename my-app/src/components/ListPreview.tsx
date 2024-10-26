@@ -7,6 +7,7 @@ import { ImageGrid } from './poster-item'
 import defualtlist from "./movieicon.png";
 import Moviebox from './Moviebox'
 import Showbox from './Showbox'
+import { ShowDetailResponse } from '@/types/types'
 
 const ListPreview = () => {
     const params = useParams()
@@ -15,9 +16,9 @@ const ListPreview = () => {
     const location = useLocation();
     const lst: ListWithPostersRpcResponse = location.state?.item
     const client = new TMDBCClient()
-    
+    console.log(lst, "LISTPREV")
     const [movies, setMovies] = useState<MovieListResult[]>([])
-    const [shows, setShows] = useState<ShowListResult[]>([])
+    const [shows, setShows] = useState<ShowDetailResponse[]>([])
 
     useEffect(() => {
         // Ensure the list exists and has a valid list_id
@@ -31,7 +32,7 @@ const ListPreview = () => {
             try {
                 // Fetch list items by list_id
                 const listItem = await selectListByID(lst.list_id);
-    
+                console.log(listItem, "LSITITEM")
                 // Use the fetched listItems directly for processing movies/shows
                 if (!listItem || listItem.length === 0) {
                     console.log("No list items found.");
@@ -100,16 +101,26 @@ const ListPreview = () => {
         />
       </div>
     ))}
-    {shows.map((show: ShowListResult) => (
-      <div key={show.id} className="flex flex-col items-center">
-        <Showbox
-          item={show}
-          show_id={show.id}
-          title={show.name}
-          posterpath={show.poster_path}
-        />
-      </div>
-    ))}
+    {shows.map((show: ShowDetailResponse) => {
+      // Mapping logic for shows, transforming genres to genre_ids
+      const mappedShow = {
+        ...show,
+        title: show.name || "", // Map `name` to `title` for Showbox
+        genre_ids: show.genres ? show.genres.map((genre) => genre.id) : [] // Extract genre IDs
+      };
+
+      return (
+        <div key={show.id} className="flex flex-col items-center">
+          <Showbox
+            item={mappedShow}
+            show_id={mappedShow.id}
+            title={mappedShow.title} // Use `title` here after mapping
+            posterpath={mappedShow.poster_path}
+          />
+        </div>
+      );
+    })}
+
   </div>
 </div>
 

@@ -56,7 +56,7 @@ export function Sidebar({
           <Link 
             to={`/home/list/${item.list_id}`} 
             state={{ item }} 
-            key={item.list_id}  // Added key here
+            key={item.list_id}
           >
             <div className="flex items-center space-x-4 rounded-lg bg-white shadow-md p-4">
               <div className="w-20 h-20 flex-shrink-0">

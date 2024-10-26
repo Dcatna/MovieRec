@@ -104,7 +104,6 @@ function DefaultListListing(
             </div>
           </div>
 
-          {/* Scrollable Container */}
           <ScrollContainer className="scroll-container flex flex-row w-full overflow-x-auto h-max-screen" hideScrollbars={false}>
           {list.listitem?.map((item, index) => (
               <Link to={"/"}>
@@ -166,13 +165,15 @@ function UserCreatedListListing({
       {data?.map((item) => {
         return (
           <div className="w-ful l">
-            <ListPreviewItem
-              className="p-2 max-w-full overflow-hidden"
-              title={item.name}
-              description={item.description}
-              images={contentFrom(item).map((it) => it.url)}
-            >
-            </ListPreviewItem>
+            <Link to={`/home/list/${item.list_id}`} state={{ item }} key={item.list_id}>
+              <ListPreviewItem
+                className="p-2 max-w-full overflow-hidden"
+                title={item.name}
+                description={item.description}
+                images={contentFrom(item).map((it) => it.url)}
+              >
+              </ListPreviewItem>
+            </Link>
           </div>
         );
       })}

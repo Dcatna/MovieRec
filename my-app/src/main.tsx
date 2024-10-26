@@ -15,6 +15,7 @@ import BrowsePage from "./Pages/Browse";
 import MovieInfo from "./components/MovieInfo";
 import ShowInfo from "./components/ShowInfo";
 import ListPreview from "./components/ListPreview";
+import Recommendations from "./Pages/Recommendations";
 
 const router = createBrowserRouter([
   {
@@ -41,6 +42,9 @@ const router = createBrowserRouter([
       },
       {
         path: 'browse', element: <BrowsePage/>
+      },
+      {
+        path: 'recommended', element: <Recommendations/>
       },
       {
         path: "movieinfo", element: <MovieInfo/>
