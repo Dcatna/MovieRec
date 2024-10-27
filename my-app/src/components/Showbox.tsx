@@ -23,9 +23,8 @@ const Showbox = ({show_id, title, posterpath, item} : showBoxProp) => {
         event.preventDefault(); // Prevent link navigation
         event.stopPropagation();
         const {data} = await supabase.from("favoritemovies").select("*").eq("show_id", show_id)
-        console.log(data)
         if(data?.length == 0) {
-            const {data, error} = await supabase.from("favoritemovies").insert([{
+            const {error} = await supabase.from("favoritemovies").insert([{
                 movie_id: -1,
                 show_id : show_id, 
                 user_id: client?.user_id, 
@@ -35,18 +34,16 @@ const Showbox = ({show_id, title, posterpath, item} : showBoxProp) => {
                 vote_average: 0 
                 }])
             if(error) {
-                console.log(error, "hi")
+                console.log(error)
             }
-            else{
-                console.log(data)
-            }
+            
         }
         else{
             console.log("MOVIE IS ALREADY FAVORITED")
         }
         
     }
-    console.log(title, item.name, item.title,"NAMES", item)
+    //console.log(title, item.name, item.title,"NAMES", item)
 
     return (
         

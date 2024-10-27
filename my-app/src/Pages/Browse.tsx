@@ -36,7 +36,13 @@ const BrowsePage = () => {
   } = useInfiniteQuery({
     queryKey: ["trendingMovies", genreIds],
     queryFn: ({ pageParam = 1 }) => client.fetchMovieList(pageParam, "movie", genreIds),
-    getNextPageParam: (lastPage) => lastPage.page < lastPage.total_pages ? lastPage.page + 1 : undefined,
+    getNextPageParam: (lastPage) => {
+      if (lastPage.page < lastPage.total_pages) {
+          return lastPage.page + 1;
+      } else {
+          return undefined;
+      }
+  },
     enabled: searchState === "movie", // Only enable when searchState is "movie"
   });
 
@@ -48,46 +54,37 @@ const BrowsePage = () => {
   } = useInfiniteQuery({
     queryKey: ["trendingShows", genreIds],
     queryFn: ({ pageParam = 1 }) => client.fetchShowList(pageParam, "tv", genreIds),
-    getNextPageParam: (lastPage) => lastPage.page < lastPage.total_pages ? lastPage.page + 1 : undefined,
-    enabled: searchState === "tv", // Only enable when searchState is "tv"
+    getNextPageParam: (lastPage) => {
+      if (lastPage.page < lastPage.total_pages) {
+          return lastPage.page + 1;
+      } else {
+          return undefined;
+      }
+  },    enabled: searchState === "tv", // Only enable when searchState is "tv"
   });
 
   // Scroll handler for infinite scrolling
   useEffect(() => {
-    if (!ref.current) {
-      console.error("Scroll reference is not set up correctly.");
-      return;
-    }
-    
-    console.log("Setting up scroll event listener");
-
     const handleScroll = () => {
-      if (!ref.current) return;
-
-      const { scrollTop, scrollHeight, clientHeight } = ref.current;
-      console.log("Scroll positions:", { scrollTop, scrollHeight, clientHeight });
-
-      if (scrollHeight - scrollTop <= clientHeight + 1) {
+      const scrollTop = window.scrollY;
+      const clientHeight = window.innerHeight;
+      const scrollHeight = document.documentElement.scrollHeight;
+    
+      if (scrollHeight - scrollTop <= clientHeight + 100) {
+  
         if (searchState === "movie" && hasNextMoviePage) {
-          console.log("Fetching next page for movies...");
           fetchNextMoviePage().catch(console.error);
         } else if (searchState === "tv" && hasNextShowPage) {
-          console.log("Fetching next page for shows...");
           fetchNextShowPage().catch(console.error);
         }
       }
     };
-
-    ref.current.addEventListener("scroll", handleScroll);
-    console.log("Scroll event listener added");
-
-    // Cleanup function to remove the event listener
+    window.addEventListener("scroll", handleScroll);
     return () => {
-      console.log("Removing scroll event listener");
-      ref.current?.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("scroll", handleScroll);
     };
-  }, [searchState, fetchNextMoviePage, fetchNextShowPage, hasNextMoviePage, hasNextShowPage, ref]);
-
+  }, [searchState, fetchNextMoviePage, fetchNextShowPage, hasNextMoviePage, hasNextShowPage]);
+  
   // Conditionally combine the data from movies or shows
   const items = useMemo(() => {
     return searchState === "movie"

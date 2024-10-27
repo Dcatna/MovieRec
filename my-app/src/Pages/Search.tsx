@@ -17,7 +17,7 @@ const SearchPage = () => {
     //const client = useUserStore(useShallow((state) => state.stored))
     const tmdbclient = new TMDBCClient()
 
-    const { data, fetchNextPage } = useInfiniteQuery({
+    const { data, fetchNextPage, hasNextPage  } = useInfiniteQuery({
       queryKey: ['search', currSearch, searchState],
       queryFn: async ({ pageParam = 1 }) => {
           if (currSearch !== "") {
@@ -30,23 +30,27 @@ const SearchPage = () => {
       },
       getNextPageParam: (lastPage) => lastPage.page < lastPage.total_pages ? lastPage.page + 1 : undefined,
   });
-    
-  const {ref} = useScrollContext()
-  
+      
   useEffect(() => {
     const handleScroll = () => {
-        const { scrollTop, scrollHeight, clientHeight } = ref.current!;
-        //checking if we are near the bottom of the screen
-         // Checking if the div has been scrolled to the bottom
-         if (scrollHeight - scrollTop <= clientHeight + 1) {
-            fetchNextPage().catch((e) => alert(e.toLocaleString()));
-        }
-    }
+      const scrollTop = window.scrollY;
+      const clientHeight = window.innerHeight;
+      const scrollHeight = document.documentElement.scrollHeight;
 
-    ref.current?.addEventListener('scroll', handleScroll)
-    return () => ref.current?.removeEventListener('scroll', handleScroll)
+      // Check if we're close to the bottom of the page
+      if (scrollHeight - scrollTop <= clientHeight + 100 && hasNextPage) {
+        fetchNextPage().catch((e) => alert(e.toLocaleString()));
+      }
+    };
 
-}, [])
+    window.addEventListener("scroll", handleScroll);
+    console.log("Scroll event listener added");
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      console.log("Scroll event listener removed");
+    };
+  }, [searchState, fetchNextPage, hasNextPage]);
 
 
   const items : SearchResult[] = useMemo(() => {
