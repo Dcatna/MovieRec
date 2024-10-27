@@ -69,7 +69,7 @@ const Showbox = ({show_id, title, posterpath, item} : showBoxProp) => {
                 <div className="rounded-md absolute bottom-0 left-0 h-full w-full hover:bg-gradient-to-t from-slate-900 to-transparent bg-transparent"/>
                 <text
                     className="rounded-md line-clamp-2 absolute bottom-0 left-0 m-2 group-hover:animate-bounce text-white">
-                    {item.title}
+                    {title ?? item.name ?? item.title ?? "No title available"}
                 </text>
             </div>
             </Link>

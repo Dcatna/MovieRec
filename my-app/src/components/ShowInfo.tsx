@@ -1,4 +1,4 @@
-import { MovieTrailer } from "@/types/MovieListResponse"
+import { MovieTrailer, ShowListResult } from "@/types/MovieListResponse"
 import { Cast, Credit} from "@/types/types"
 import { faPlay } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
@@ -27,14 +27,14 @@ const Showinfo = () => {
     // const [comments, setComments] = useState<CommentWithReply[]>([])
 
     async function fetchShowTrailer() {
-      const video_response: Promise<MovieTrailer> = tmdbclient.fetchShowTrailer(show.item.id);
+      const video_response: Promise<MovieTrailer> = tmdbclient.fetchShowTrailer(show.show_id);
       
       const trailer: MovieTrailer = await video_response
-      console.log(trailer, "Tialer")
+      // console.log(trailer, "Tialer")
       setVideoData(trailer)
   }   
     async function fetchCredits() {
-      const cred : Promise<Credit> = tmdbclient.fetchShowCreditList(show.item.id)
+      const cred : Promise<Credit> = tmdbclient.fetchShowCreditList(show.show_id)
       const credits : Credit = await cred
       setActors(credits.cast)
     }
@@ -63,8 +63,22 @@ const Showinfo = () => {
         console.log("user not logged in")
       }
     }
-    useEffect(() => {
 
+    async function reFetchShow(){
+      const result = await tmdbclient.fetchShowByID(show.show_id)
+      show.item = {
+        ...result,
+        genre_ids: result.genres?.map((genre) => genre.id) || [], // Assuming `genres` is an array of objects with an `id`
+        title: result.name || "", // Assuming `name` is equivalent to `title`
+      } as ShowListResult;
+    }
+
+
+    useEffect(() => {
+        console.log(show.item, "SHOWITEMS")
+        if (show.item.overview == undefined) {
+          reFetchShow()
+        }
         fetchCredits()
         getUserLists()
         // fetchSimilarShows()

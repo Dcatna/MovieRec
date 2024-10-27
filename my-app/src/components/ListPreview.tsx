@@ -15,8 +15,8 @@ const ListPreview = () => {
     const listId = params['listId']
     const location = useLocation();
     const lst: ListWithPostersRpcResponse = location.state?.item
+    // console.log(lst, "lSTsdfsdfsdfsdfsdfsdfsd")
     const client = new TMDBCClient()
-    console.log(lst, "LISTPREV")
     const [movies, setMovies] = useState<MovieListResult[]>([])
     const [shows, setShows] = useState<ShowDetailResponse[]>([])
 

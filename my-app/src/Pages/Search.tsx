@@ -1,8 +1,8 @@
-import { useScrollContext } from "@/App";
 import Moviebox from "@/components/Moviebox";
 import Showbox from "@/components/Showbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import TMDBCClient from "@/Data/TMDB-fetch";
+import { useScrollContext } from "@/ScrollContext";
 import { MovieListResult, ResourceType, ShowListResult } from "@/types/MovieListResponse";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";

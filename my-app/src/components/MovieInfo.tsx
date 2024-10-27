@@ -59,8 +59,14 @@ const MovieInfo = () => {
         console.log("user not logged in")
       }
     }
-
+    async function reFetchMovie(){
+      const res = await tmdbclient.fetchMovieByID(movie.movie_id)
+      movie.item = res
+    }
     useEffect(() => {
+        if (movie.item.overview == undefined) {
+          reFetchMovie()
+        }
         fetchMovieTrailer()
         fetchCredits()
         getUserLists()

@@ -7,13 +7,30 @@ import {
   ListWithPostersRpcResponse,
   selectListsByUserId,
 } from "@/Data/supabase-client.ts";
-import { ListWithItems } from "@/Data/userstore";
+import { ListItem, ListWithItems } from "@/Data/userstore";
 import { cn, range } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import ScrollContainer from 'react-indiana-drag-scroll';
 const DEFAULT_LIST_USER = "c532e5da-71ca-4b4b-b896-d1d36f335149"
-
+const convertListItemsToResponse = (
+  items: ListItem[],
+  listInfo: Partial<ListWithPostersRpcResponse>
+): ListWithPostersRpcResponse => {
+  return {
+    created_at: listInfo.created_at || "",
+    description: listInfo.description || "",
+    list_id: listInfo.list_id || "",
+    name: listInfo.name || "Unnamed List",
+    public: listInfo.public || false,
+    updated_at: listInfo.updated_at,
+    user_id: listInfo.user_id || "",
+    username: listInfo.username || "Unknown",
+    profile_image: listInfo.profile_image,
+    ids: items.map((item) => (item.movie_id !== -1 ? String(item.movie_id) : String(item.show_id))),
+    total: items.length,
+  };
+};
 export function HomePage() {
   const recent = useQuery({
     queryKey: ["recent"],
@@ -92,36 +109,74 @@ function DefaultListListing(
   }
 
   return (
-    <div className={className}> 
-      {data?.map((list) => (
-        <div className="flex flex-col" key={list.name}>
-          <div className="flex flex-col">
-            <h1 className="text-3xl font-semibold tracking-tight">
-              {list.name}
-            </h1>
-            <div className="text-sm font-light text-foreground tracking-tight">
-              {list.description}
-            </div>
-          </div>
-
-          <ScrollContainer className="scroll-container flex flex-row w-full overflow-x-auto h-max-screen" hideScrollbars={false}>
-          {list.listitem?.map((item, index) => (
-              <Link to={"/"}>
-              <div className="flex flex-col me-2" key={index}>
-                <CrossfadeImage 
-                  className="h-56 object-cover aspect-[3/4] rounded-md"
-                  src={item.poster_path?.replace("original", "w200")} 
-                />
-                <h2 className="text-xl w-44 line-clamp-2">{item.title}</h2>
+    <div className={className}>
+      {data?.map((list) => {
+        const convertedList = convertListItemsToResponse(list.listitem!, {
+          created_at: list.created_at,
+          description: list.description,
+          list_id: list.list_id,
+          name: list.name,
+          public: Boolean(list.public),
+          user_id: list.user_id,
+          username: list.user_id,
+          profile_image: "",
+        });
+  
+        return (
+          <div className="flex flex-col" key={convertedList.list_id}>
+            <div className="flex flex-col">
+              <h1 className="text-3xl font-semibold tracking-tight">
+                {convertedList.name}
+              </h1>
+              <div className="text-sm font-light text-foreground tracking-tight">
+                {convertedList.description}
               </div>
-              </Link>
-            ))}
-          </ScrollContainer>
-
-        </div>
-      ))}
+            </div>
+  
+            <ScrollContainer
+              className="scroll-container flex flex-row w-full overflow-x-auto h-max-screen"
+              hideScrollbars={false}
+            >
+              {list.listitem?.map((item, index) => (
+                <Link
+                  to={item.movie_id !== -1 ? `/movieinfo` : `/showinfo`}
+                  state={
+                    item.movie_id === -1
+                      ? { // Show state
+                          show_id: item.show_id,
+                          title: item.title || undefined,
+                          posterpath: item.poster_path || undefined,
+                          item: item || undefined, // Pass the whole item if available
+                          type: "show" // Additional flag to specify type
+                        }
+                      : { // Movie state
+                          movie_id: item.movie_id,
+                          title: item.title || undefined,
+                          posterpath: item.poster_path || undefined,
+                          item: item || undefined, // Pass the whole item if available
+                          type: "movie" // Additional flag to specify type
+                        }
+                  }
+                  key={index}
+                >
+                  <div className="flex flex-col me-2">
+                    <CrossfadeImage
+                      className="h-56 object-cover aspect-[3/4] rounded-md"
+                      src={item.poster_path?.replace("original", "w200")}
+                    />
+                    <h2 className="text-xl w-44 line-clamp-2">
+                      {item.title}
+                    </h2>
+                  </div>
+                </Link>
+              ))}
+            </ScrollContainer>
+          </div>
+        );
+      })}
     </div>
-  )
+  );
+  
 }
 
 function ListLoadingElement(props: React.HtmlHTMLAttributes<HTMLDivElement>) {
