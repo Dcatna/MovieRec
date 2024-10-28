@@ -6,7 +6,6 @@ import { useState, useEffect, useMemo } from "react";
 import genreData from "../Data/genres.json";
 import { Badge } from "@/components/ui/Badge";
 import Showbox from "@/components/Showbox";
-import { useScrollContext } from "@/ScrollContext";
 
 export interface Genre {
   id: number;
@@ -18,7 +17,6 @@ const BrowsePage = () => {
   const client = new TMDBCClient();
   const [searchState, setSearchState] = useState<ResourceType>("movie");
   const genres = genreData.genres as Genre[];
-  const { ref } = useScrollContext();
 
   const handleFilterButtons = (filter: number) => {
     setGenreIds((prevFilters: number[]) =>

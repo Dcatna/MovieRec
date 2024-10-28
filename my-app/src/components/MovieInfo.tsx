@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { movieBoxProp } from "./Moviebox";
 import ActorBox from "./ActorBox";
-import { addToListByID, selectListsByUserId, StoredUser } from "@/Data/supabase-client";
+import { addToListByID, selectListsByUserId} from "@/Data/supabase-client";
 import { ListWithItems, useUserStore } from "@/Data/userstore";
 import { useShallow } from "zustand/shallow";
 
@@ -133,6 +133,8 @@ const MovieInfo = () => {
               <p className='mt-5'>{movie.item.vote_average}</p>
               <p className='mt-5'>Overview</p>
               <p >{movie.item.overview}</p>
+              <p className='mt-5'>Release Date: {movie.item.release_date}</p>
+
               <Link to= "/WatchItem" state = {movie} className='flex'>
                 <p>Watch Movie</p>
                 <div className='mt-[2px] ml-1'>

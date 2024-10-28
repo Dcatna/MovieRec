@@ -54,7 +54,7 @@ const Moviebox = ({movie_id, title, posterpath, item} : movieBoxProp) => {
             
             <div className="absolute top-0 right-0 m-2 z-10">
                 <button onClick={(event) => handleFavorites(event, movie_id, title, posterpath)}>
-                    <FontAwesomeIcon icon={faStar} />
+                    <FontAwesomeIcon icon={faStar} className='text-yellow-500'/>
                 </button>
                 
             </div>

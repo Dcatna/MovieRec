@@ -139,6 +139,7 @@ const Showinfo = () => {
             <p className='mt-5'>{show.item.vote_average}</p>
             <p className='mt-5'>Overview</p>
             <p >{show.item.overview}</p>
+            <p className="mt-5">Release Data: {show.item.first_air_date}</p>
             <Link to= "/WatchShow" state = {show} className='flex'>
                 <p>Watch Show</p>
                 <div className='mt-[2px] ml-1'>

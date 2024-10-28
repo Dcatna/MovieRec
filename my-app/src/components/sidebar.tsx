@@ -10,6 +10,7 @@ import PopupExample from "./AddListPopup";
 import { useRefresh } from './RefreshContext'; // Import your context hook
 import defualtlist from "./movieicon.png";
 import { Link } from "react-router-dom";
+import defualtFav from "./default_favorite_list.jpg"
 
 export interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
   user: StoredUser | null;
@@ -31,6 +32,11 @@ export function Sidebar({
     refetchOnWindowFocus: true,
   });
 
+  // const { data: favoriteMoviesData, refetch: refetchFavoriteMovies } = useQuery({
+  //   queryKey: ['favoritemovies', user?.user_id],
+  //   queryFn: async () => await getFavoritedMoviesByUser(),
+  //   refetchOnWindowFocus: true,
+  // });
   // Effect to handle refetching when shouldRefresh is true
   useEffect(() => {
     if (shouldRefresh) {
@@ -42,37 +48,46 @@ export function Sidebar({
   return (
     <div className={cn("pb-12 h-full", className)}>
       <div className="space-y-4 py-4">
-        <div className='flex items-center justify-between'>
+        <div className="flex items-center justify-between">
           <div className="flex">
-            <FontAwesomeIcon className='mt-1 size-6' icon={faGripLinesVertical} />
-            <p className='ml-1 text-lg'>Your Library</p>
+            <FontAwesomeIcon className="mt-1 size-6" icon={faGripLinesVertical} />
+            <p className="ml-1 text-lg">Your Library</p>
           </div>
-          <div className="">
+          <div>
             <PopupExample />
           </div>
         </div>
         <div className="grid grid-cols-1 gap-4">
-        {listData?.map((item: ListWithPostersRpcResponse) => (
-          <Link 
-            to={`/home/list/${item.list_id}`} 
-            state={{ item }} 
-            key={item.list_id}
-          >
+          {user !== null ? 
+          <Link to={`/home/list/favorites`} state={{undefined}}>
             <div className="flex items-center space-x-4 rounded-lg bg-white shadow-md p-4">
               <div className="w-20 h-20 flex-shrink-0">
-                {item.ids && item.ids.length > 3 ? (
-                  <ImageGrid images={contentFrom(item).map((it) => it.url)} />
-                ) : (
-                  <img src={defualtlist} alt="default list" />
-                )}
+                <img src={defualtFav} alt="default favorite" className="w-full h-full object-cover rounded-lg" />
               </div>
               <div className="flex flex-col">
-                <p className="font-bold text-lg">{item.name}</p>
-                <p className="text-gray-500 text-sm">Created by: {item.username}</p>
+                <p className="font-bold text-lg">Favorites</p>
+                <p className="text-gray-500 text-sm">Created by: {user?.username}</p>
               </div>
             </div>
-          </Link>
-        ))}
+          </Link> : <div/>}
+
+          {listData?.map((item: ListWithPostersRpcResponse) => (
+            <Link to={`/home/list/${item.list_id}`} state={{ item }} key={item.list_id}>
+              <div className="flex items-center space-x-4 rounded-lg bg-white shadow-md p-4">
+                <div className="w-20 h-20 flex-shrink-0">
+                  {item.ids && item.ids.length > 3 ? (
+                    <ImageGrid images={contentFrom(item).map((it) => it.url)} />
+                  ) : (
+                    <img src={defualtlist} alt="default list" className="w-full h-full object-cover rounded-lg" />
+                  )}
+                </div>
+                <div className="flex flex-col">
+                  <p className="font-bold text-lg">{item.name}</p>
+                  <p className="text-gray-500 text-sm">Created by: {item.username}</p>
+                </div>
+              </div>
+            </Link>
+          ))}
         </div>
       </div>
     </div>

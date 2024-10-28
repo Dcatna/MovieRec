@@ -1,6 +1,6 @@
 import { TokenBucket } from "@/ratelimit/TokenBucket";
 import { TokenBuckets } from "@/ratelimit/TokenBuckets";
-import { MovieListResponse, MovieListResult, MovieTrailer, ResourceType, ShowListResponse, ShowListResult, SortType } from "@/types/MovieListResponse";
+import { MovieListResponse, MovieListResult, MovieTrailer, ResourceType, ShowListResponse, SortType } from "@/types/MovieListResponse";
 import { buildUrl } from "./query";
 import { Credit, ShowDetailResponse, SimilarMovieResult } from "@/types/types";
 

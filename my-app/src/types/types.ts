@@ -3,6 +3,17 @@ export interface Genre {
     name: string;
 }
 
+export interface favs {
+  _id: number
+  user_id : number
+  poster_path: string
+  title: string
+  overview: string
+  vote_average: number
+  movie_id : number
+  show_id : number
+}
+
 export interface ShowDetailResponse {
   adult: boolean;
   backdrop_path: string;

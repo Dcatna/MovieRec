@@ -3,6 +3,7 @@ import { Database } from './supabase'
 import { ListItem, ListWithItems } from './userstore';
 import { showBoxProp } from '@/components/Showbox';
 import { movieBoxProp } from '@/components/Moviebox';
+import { favs } from '@/types/types';
 
 // Create a single supabase client for interacting with your database
 export const supabase = createClient<Database>(
@@ -211,3 +212,12 @@ export async function addToListByID(listID : string, movie: movieBoxProp | undef
     }
     
 }   
+
+export async function getFavoritedMoviesByUser() : Promise<favs[] | null>{
+    const {data, error} = await supabase.from("favoritemovies").select("*")
+    if(error) {
+      console.log(error)
+    }
+
+    return data as unknown as favs[]
+}
