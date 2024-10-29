@@ -214,10 +214,40 @@ export async function addToListByID(listID : string, movie: movieBoxProp | undef
 }   
 
 export async function getFavoritedMoviesByUser() : Promise<favs[] | null>{
-    const {data, error} = await supabase.from("favoritemovies").select("*")
+    const {data, error} = await supabase.from("favoritemovies").select("*").neq('movie_id', -1)
     if(error) {
       console.log(error)
+      return null
     }
 
+    return data as unknown as favs[]
+}
+
+export async function getFavoritedShowsByUser() : Promise<favs[] | null>{
+    const {data, error } = await supabase.from("favoritemovies").select("*").neq("show_id", -1)
+    if (error){
+        console.log(error)
+        return null
+    }
+    return data as unknown as favs[]
+}
+
+export async function getRecentMovieFavorites() : Promise<favs[] | null> {
+    const {data, error} = await supabase.from("favoritemovies").select("*").neq('movie_id', -1).order("created_at" , {ascending: false}).limit(15)
+
+    if (error) {
+        console.log(error)
+    }
+    
+    return data as unknown as favs[]
+    
+}
+
+export async function getRecentShowFavorites() : Promise<favs[] | null> {
+    const {data, error} = await supabase.from("favoritemovies").select("*").neq('show_id', -1).order("created_at" , {ascending: false}).limit(15)
+    if (error) {
+        console.log(error)
+    }
+    
     return data as unknown as favs[]
 }

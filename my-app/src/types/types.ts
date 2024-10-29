@@ -12,6 +12,7 @@ export interface favs {
   vote_average: number
   movie_id : number
   show_id : number
+  created_at : string
 }
 
 export interface ShowDetailResponse {

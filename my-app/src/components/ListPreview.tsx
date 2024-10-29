@@ -43,26 +43,18 @@ const ListPreview = () => {
     }
 
 
-    useEffect(() => {
-        // Ensure the list exists and has a valid list_id
-        console.log(lst);
-        
+    useEffect(() => {        
         if (lst === undefined) {
             getFavorites()
         }
     
         const getLists = async () => {
             try {
-                // Fetch list items by list_id
                 const listItem = await selectListByID(lst.list_id);
-                console.log(listItem, "LSITITEM")
-                // Use the fetched listItems directly for processing movies/shows
                 if (!listItem || listItem.length === 0) {
                     console.log("No list items found.");
                     return;
                 }
-    
-                // Iterate through the list items and fetch movie/show data
                 const fetchedMovies = [];
                 const fetchedShows = [];
     
