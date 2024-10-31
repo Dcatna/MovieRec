@@ -182,8 +182,7 @@ const Recommendations = () => {
                                     movie_id={recItem.id}
                                     title={recItem.title}
                                     posterpath={recItem.poster_path}
-                                    item={recItem}
-                                />
+                                    item={recItem} inList={false} list_id={undefined}                                />
                             </div>
                         ))
                     )
@@ -196,8 +195,7 @@ const Recommendations = () => {
                                 show_id={recItem.id}
                                 title={recItem.name}
                                 posterpath={recItem.poster_path}
-                                item={recItem}
-                            />
+                                item={recItem} inList={false} list_id={undefined}                            />
                         </div>
                     ))
                 )}

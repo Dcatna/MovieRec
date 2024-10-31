@@ -77,6 +77,12 @@ export function Sidebar({
                 <div className="w-20 h-20 flex-shrink-0">
                   {item.ids && item.ids.length > 3 ? (
                     <ImageGrid images={contentFrom(item).map((it) => it.url)} />
+                  ) : item.ids && item.ids.length > 0 ? (
+                    <img 
+                      src={item.ids[0].split(",").find(part => part.startsWith("https")) || defualtlist}
+                      alt="list preview"
+                      className="w-full h-full object-cover rounded-lg"
+                    />
                   ) : (
                     <img src={defualtlist} alt="default list" className="w-full h-full object-cover rounded-lg" />
                   )}
@@ -87,7 +93,8 @@ export function Sidebar({
                 </div>
               </div>
             </Link>
-          ))}
+        ))}
+
         </div>
       </div>
     </div>

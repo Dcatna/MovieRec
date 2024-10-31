@@ -11,14 +11,17 @@ export interface movieBoxProp {
     movie_id : number,
     title: string,
     posterpath: string,
-    item : MovieListResult
-    //movie_id : string | undefined
+    item : MovieListResult,
+    inList : boolean
+    list_id : string | undefined
+    onDelete? : (movieId: number) => void
 }
 
-const Moviebox = ({movie_id, title, posterpath, item} : movieBoxProp) => {
+const Moviebox = ({movie_id, title, posterpath, item, inList, list_id, onDelete} : movieBoxProp) => {
     const partial_url = "https://image.tmdb.org/t/p/original/"
     const client = useUserStore(useShallow((state) => state.stored));
     const [loaded, setLoaded] = useState(false)
+    
     async function handleFavorites(event: React.MouseEvent, movie_id : number, title : string, posterpath: string) {
         event.preventDefault(); // Prevent link navigation
         event.stopPropagation();
@@ -48,14 +51,50 @@ const Moviebox = ({movie_id, title, posterpath, item} : movieBoxProp) => {
         
     }
 
+    async function removeMovie(event: React.MouseEvent){
+        event.preventDefault(); // Prevent link navigation
+        event.stopPropagation();
+        console.log(client?.user_id, "USER", item.id, list_id)
+        if (list_id != undefined) {
+            const {data, error} = await supabase.from("listitem").delete().match({
+                movie_id: item.id, 
+                list_id: list_id,
+                user_id: client?.user_id})
+            if(error){
+                console.log(error)
+            }else{
+                console.log(data)
+                onDelete!!(item.id)
+            }
+        }else{
+            const {data, error} = await supabase.from('favoritemovies').delete().match({
+                movie_id: item.id,
+                user_id: client?.user_id,
+                show_id: -1,})
+
+            if(error){
+                console.log(error)
+            }else{
+                console.log(data)
+                onDelete!!(item.id)
+            }
+        }
+        
+    }
+
+
     return (
         <div className="relative group">
         {loaded && (
             
             <div className="absolute top-0 right-0 m-2 z-10">
+                {!inList ? 
                 <button onClick={(event) => handleFavorites(event, movie_id, title, posterpath)}>
                     <FontAwesomeIcon icon={faStar} className='text-yellow-500'/>
-                </button>
+                </button> : 
+                <button onClick={(event) => removeMovie(event)}>
+                    <FontAwesomeIcon icon={faStar} className='text-red-500'/>
+                </button>}
                 
             </div>
             
@@ -65,7 +104,7 @@ const Moviebox = ({movie_id, title, posterpath, item} : movieBoxProp) => {
                 <img
                     onLoad={() => { setLoaded(true) }}
                     className="w-full h-full rounded-md animate-in"
-                    src={partial_url + posterpath}
+                    src={partial_url + item.poster_path}
                     alt="Movie Poster"
                 />
                 <div className="rounded-md absolute bottom-0 left-0 bg-gradient-to-t from-black to-transparent w-full h-4/6"/>

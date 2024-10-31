@@ -117,12 +117,12 @@ const ItemsGrid = ({items,searching}: ItemProps) => {
               {items.map((item) => (
                       'original_title' in item ? (
                           <div key={item.id}>
-                              <Moviebox movie_id={item.id} title={item.title} posterpath={item.poster_path} item={item}></Moviebox>
+                              <Moviebox movie_id={item.id} title={item.title} posterpath={item.poster_path} item={item} inList={false} list_id={undefined}></Moviebox>
                           </div>
                       ) : (
 
                           <div key={item.id}>
-                              <Showbox show_id={item.id} title={item.name} posterpath={item.poster_path} item={item}></Showbox>
+                              <Showbox show_id={item.id} title={item.name} posterpath={item.poster_path} item={item} inList={false} list_id={undefined}></Showbox>
                           </div>
                       )
                   ))}

@@ -133,15 +133,14 @@ const BrowsePage = () => {
                   movie_id={item.id}
                   title={(item as MovieListResult).title ?? ""}
                   posterpath={item.poster_path}
-                  item={item as MovieListResult}
+                  item={item as MovieListResult} inList={false} list_id={undefined}                  
                 />
               ) : (
                 <Showbox
-                  show_id={item.id}
-                  title={(item as ShowListResult).name ?? ""}
-                  posterpath={item.poster_path}
-                  item={item as ShowListResult}
-                />
+                    show_id={item.id}
+                    title={(item as ShowListResult).name ?? ""}
+                    posterpath={item.poster_path}
+                    item={item as ShowListResult} inList={false} list_id={undefined}                />
               )}
             </div>
           ))}

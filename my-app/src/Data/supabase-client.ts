@@ -178,13 +178,16 @@ export async function selectListByID(listID : string) : Promise<ListItem[] | nul
 }
 
 export async function addToListByID(listID : string, movie: movieBoxProp | undefined, show: showBoxProp | undefined, client : StoredUser | null) {
+    const partial_url = "https://image.tmdb.org/t/p/original/"
+
+    //console.log(partial_url +movie?.item.poster_path.slice(1, movie.item.poster_path.length), "POSTER")
     if (show === undefined) {
         const {data, error} = await supabase.from("listitem").insert({
             "list_id" : listID,
             "movie_id" : movie!!.item.id,
             "show_id" : -1,
             "user_id" : client?.user_id,
-            "poster_path" : movie?.item.poster_path.slice(1, movie.item.poster_path.length),
+            "poster_path" :partial_url + movie?.item.poster_path.slice(1, movie.item.poster_path.length),
             "title" : movie?.item.title,
             "description" : movie?.item.overview,
          

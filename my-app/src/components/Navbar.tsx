@@ -12,7 +12,7 @@ const Navbar = () => {
     console.log("USERRRR", user?.user_id);
 
     return (
-        <nav className="sticky top-0 z-20 bg-white shadow-md"> {/* Add sticky classes here */}
+        <nav className="sticky top-0 z-20 bg-white shadow-sm"> {/* Add sticky classes here */}
             <div className="w-full flex justify-center items-center bg-transparent py-4">
                 <Button asChild variant="ghost">
                     <Link to="/home">Home</Link>
