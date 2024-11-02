@@ -1,9 +1,9 @@
 import { createClient, Session, User } from '@supabase/supabase-js'
 import { Database } from './supabase'
 import { ListItem, ListWithItems } from './userstore';
-import { showBoxProp } from '@/components/Showbox';
 import { movieBoxProp } from '@/components/Moviebox';
 import { favs } from '@/types/types';
+import { ShowListResult } from '@/types/MovieListResponse';
 
 // Create a single supabase client for interacting with your database
 export const supabase = createClient<Database>(
@@ -124,7 +124,7 @@ export async function signInWithEmailAndPassword(email: string, password: string
  }
 
 
-export async function selectListsByUserId(userId: string): Promise<ListWithItems[] | null> {
+export async function selectListsByUserId(userId: string | undefined): Promise<ListWithItems[] | null> {
     try {
         const res = await supabase
             .from("userlist")
@@ -177,7 +177,7 @@ export async function selectListByID(listID : string) : Promise<ListItem[] | nul
 
 }
 
-export async function addToListByID(listID : string, movie: movieBoxProp | undefined, show: showBoxProp | undefined, client : StoredUser | null) {
+export async function addToListByID(listID : string, movie: movieBoxProp | undefined, show: ShowListResult | undefined, client : StoredUser | null) {
     const partial_url = "https://image.tmdb.org/t/p/original/"
 
     //console.log(partial_url +movie?.item.poster_path.slice(1, movie.item.poster_path.length), "POSTER")
@@ -201,11 +201,11 @@ export async function addToListByID(listID : string, movie: movieBoxProp | undef
         const {data, error} = await supabase.from("listitem").insert({
             "list_id" : listID,
             "movie_id" : -1,
-            "show_id" : show.item.id,
+            "show_id" : show!!.id,
             "user_id" : client?.user_id,
-            "poster_path" : show.item.poster_path.slice(1, show.item.poster_path.length),
-            "title" : show.item.name,
-            "description" : show.item.overview,
+            "poster_path" : partial_url + show.poster_path.slice(1, show.poster_path.length),
+            "title" : show.name,
+            "description" : show.overview,
         })
         if(error) {
             console.log(error)

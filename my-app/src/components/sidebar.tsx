@@ -25,7 +25,7 @@ export function Sidebar({
   user,
 }: SidebarProps) {
   const { shouldRefresh, setShouldRefresh } = useRefresh(); // Destructure context values
-  
+
   const { data: listData, refetch } = useQuery({
     queryKey: ['user_lists', user?.user_id],
     queryFn: async () => await selectListsByIdsWithPoster(user?.user_id),
@@ -38,12 +38,13 @@ export function Sidebar({
   //   refetchOnWindowFocus: true,
   // });
   // Effect to handle refetching when shouldRefresh is true
-  useEffect(() => {
+ useEffect(() => {
     if (shouldRefresh) {
-      refetch(); // Refetch the lists
-      setShouldRefresh(false); // Reset shouldRefresh to prevent continuous refetching
+        refetch(); // Refetch the lists
+        setShouldRefresh(false); // Reset shouldRefresh to prevent continuous refetching
     }
-  }, [shouldRefresh, refetch, setShouldRefresh]);
+}, [shouldRefresh, refetch, setShouldRefresh]);
+
 
   return (
     <div className={cn("pb-12 h-full", className)}>

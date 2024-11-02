@@ -10,6 +10,7 @@ import ActorBox from "./ActorBox";
 import { addToListByID, selectListsByUserId} from "@/Data/supabase-client";
 import { ListWithItems, useUserStore } from "@/Data/userstore";
 import { useShallow } from "zustand/shallow";
+import { useRefresh } from "./RefreshContext";
 
 
 const partial_url = "https://image.tmdb.org/t/p/original/"
@@ -27,6 +28,7 @@ export type userType = {
 }
 const MovieInfo = () => {
     const client = useUserStore(useShallow((state) => state.stored));
+    const { setShouldRefresh } = useRefresh();
 
     const location = useLocation()
     const movie : movieBoxProp = location.state
@@ -112,7 +114,8 @@ const MovieInfo = () => {
                     key={list.list_id}
                     onClick={() => {
                       addToListByID(list.list_id, movie, undefined, client);
-                      alert(`Added "${movie.item.title}" to ${list.name}`);
+                      setShouldRefresh(true)
+
                     }}
                     className="cursor-pointer hover:bg-gray-200 py-2 px-4 block whitespace-no-wrap transition-colors duration-200"
                   >

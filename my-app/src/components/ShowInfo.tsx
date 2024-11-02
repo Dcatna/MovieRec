@@ -10,50 +10,38 @@ import TMDBCClient from "@/Data/TMDB-fetch"
 import { selectListsByUserId, addToListByID } from "@/Data/supabase-client"
 import { useUserStore, ListWithItems } from "@/Data/userstore"
 import { useShallow } from "zustand/shallow"
+import { useRefresh } from "./RefreshContext"
 
 const partial_url = "https://image.tmdb.org/t/p/original/"
 
 const Showinfo = () => {
     const client = useUserStore(useShallow((state) => state.stored));
+    const { setShouldRefresh } = useRefresh();
 
     const location = useLocation()
-    const show : showBoxProp = location.state
+    const show : ShowListResult = location.state.item
     const tmdbclient = new TMDBCClient()
     const [videoData, setVideoData] = useState<MovieTrailer>()
     const [actors, setActors] = useState<Cast[]>()
     const [userLists, setUserLists] = useState<ListWithItems[]>()
-
+    console.log(show, "SHOWID")
     // const [similarMovies, setSimilarMovies] = useState<SimilarMovie[]>()
     // const [comments, setComments] = useState<CommentWithReply[]>([])
 
     async function fetchShowTrailer() {
-      const video_response: Promise<MovieTrailer> = tmdbclient.fetchShowTrailer(show.show_id);
+      const video_response: Promise<MovieTrailer> = tmdbclient.fetchShowTrailer(show.id);
       
       const trailer: MovieTrailer = await video_response
       // console.log(trailer, "Tialer")
       setVideoData(trailer)
   }   
     async function fetchCredits() {
-      const cred : Promise<Credit> = tmdbclient.fetchShowCreditList(show.show_id)
+      const cred : Promise<Credit> = tmdbclient.fetchShowCreditList(show.id)
       const credits : Credit = await cred
       setActors(credits.cast)
+      console.log(actors, "ACTORES")
     }
-    // async function fetchSimilarShows() {
-    //   const res : Promise<SimilarMovieResult> = tmdbclient.fetchSimilarShow(show.item.id)
-    //   const movies : SimilarMovieResult = await res
-    //   const convertedMovies = movies.results.map(similarMovie => ({
-    //     ...similarMovie,
-    //     media_type: 'movie', // Assuming 'movie' as default for conversion
-    //     backdrop_path: similarMovie.backdrop_path || '', // Ensuring value is not undefined
-    //     poster_path: similarMovie.poster_path || '', // Ensuring value is not undefined
-    //   }));
-    //   setSimilarMovies(convertedMovies)
-    // }
-    // async function getComments() {
-    //   const data = await commentWithReply(client?.user.id, -1, show.item.id)
-    //     setComments(data as CommentWithReply[]);
-      
-    // }
+
     async function getUserLists(){
       if (client?.user_id){
         const lists = await selectListsByUserId(client?.user_id)
@@ -64,21 +52,22 @@ const Showinfo = () => {
       }
     }
 
-    async function reFetchShow(){
-      const result = await tmdbclient.fetchShowByID(show.show_id)
-      show.item = {
-        ...result,
-        genre_ids: result.genres?.map((genre) => genre.id) || [], // Assuming `genres` is an array of objects with an `id`
-        title: result.name || "", // Assuming `name` is equivalent to `title`
-      } as ShowListResult;
-    }
+    // async function reFetchShow(){
+    //   const result = await tmdbclient.fetchShowByID(show.id)
+    //   show = {
+    //     ...result,
+    //     genre_ids: result.genres?.map((genre) => genre.id) || [], // Assuming `genres` is an array of objects with an `id`
+    //     title: result.name || "", // Assuming `name` is equivalent to `title`
+    //   } as ShowListResult;
+    // }
 
 
     useEffect(() => {
-        console.log(show.item, "SHOWITEMS")
-        if (show.item.overview == undefined) {
-          reFetchShow()
-        }
+        console.log(show, "SHOWITEMS")
+        // if (show.item.name == undefined) {
+        //   console.log("ELOOOS")
+        //   reFetchShow()
+        // }
         fetchCredits()
         getUserLists()
         // fetchSimilarShows()
@@ -118,7 +107,7 @@ const Showinfo = () => {
                     key={list.list_id}
                     onClick={() => {
                       addToListByID(list.list_id, undefined, show, client);
-                      alert(`Added "${show.item.title}" to ${list.name}`);
+                      setShouldRefresh(true)
                     }}
                     className="cursor-pointer hover:bg-gray-200 py-2 px-4 block whitespace-no-wrap transition-colors duration-200"
                   >
@@ -130,16 +119,16 @@ const Showinfo = () => {
           </div>
         </div>
     <div className='relative mt-10 ml-10 flex'>
-      <div className="absolute inset-0 bg-cover bg-center z-0" style={{ backgroundImage: `url(https://image.tmdb.org/t/p/original/${show.item.poster_path})` }}></div>
+      <div className="absolute inset-0 bg-cover bg-center z-0" style={{ backgroundImage: `url(https://image.tmdb.org/t/p/original/${show.poster_path})` }}></div>
         <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent z-10"></div>
         <div className='z-20 flex items-center p-10'>
-          <img className="h-96 w-auto object-cover" src={partial_url + show.item.poster_path} alt="" />
+          <img className="h-96 w-auto object-cover" src={partial_url + show.poster_path} alt="" />
           <div className='ml-10 text-white'>
-            <p className="text-2xl">{show.item.title}</p>
-            <p className='mt-5'>{show.item.vote_average}</p>
+            <p className="text-2xl">{show.name}</p>
+            <p className='mt-5'>{show.vote_average}</p>
             <p className='mt-5'>Overview</p>
-            <p >{show.item.overview}</p>
-            <p className="mt-5">Release Data: {show.item.first_air_date}</p>
+            <p >{show.overview}</p>
+            <p className="mt-5">Release Data: {show.first_air_date}</p>
             <Link to= "/WatchShow" state = {show} className='flex'>
                 <p>Watch Show</p>
                 <div className='mt-[2px] ml-1'>
