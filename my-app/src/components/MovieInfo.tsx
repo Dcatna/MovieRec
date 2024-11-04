@@ -156,11 +156,10 @@ const MovieInfo = () => {
           <ActorBox actor={actor}></ActorBox>
         ))}
       </div>
-      <p className='mt-5 ml-[40px] mb-5'>Comments</p>
-        {/* <div className='ml-[45px]'>
-          {comments?.length != 0 ? <CommentBox comment={comments[0]} singleComment={true} onReplyClick={undefined} replyActive={false} refreshReplies={undefined}></CommentBox>: <div>There are no comments</div>}
-          <CommentPopup movieorshow={movie.item.id} isMovie={true} ></CommentPopup>
-        </div> */}
+      <p className='mt-5 ml-[40px] mb-5'></p>
+        <Link to={`${movie.item.id}/comments`} state={movie.item}>
+          <p>Comments</p>
+        </Link>
       <p className='mt-5 ml-[40px] mb-5'>Media</p>
       <div className='flex overflow-x-auto ' style={{width: '1000px', marginLeft:'40px'}}>
       {videoData?.results.length !== 0 ? (

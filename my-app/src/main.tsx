@@ -16,6 +16,7 @@ import MovieInfo from "./components/MovieInfo";
 import ShowInfo from "./components/ShowInfo";
 import ListPreview from "./components/ListPreview";
 import Recommendations from "./Pages/Recommendations";
+import CommentsPage from "./components/CommentsPage";
 
 const router = createBrowserRouter([
   {
@@ -54,6 +55,12 @@ const router = createBrowserRouter([
       },
       {
         path:"home/list/:listId", element: <ListPreview/>
+      },
+      {
+        path:"movieinfo/:movieId/comments", element: <CommentsPage/>
+      },
+      {
+        path:"showinfo/:showId/comments", element: <CommentsPage/>
       }
     ],
   },

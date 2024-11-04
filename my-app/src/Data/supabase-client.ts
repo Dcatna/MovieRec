@@ -4,6 +4,8 @@ import { ListItem, ListWithItems } from './userstore';
 import { movieBoxProp } from '@/components/Moviebox';
 import { favs } from '@/types/types';
 import { ShowListResult } from '@/types/MovieListResponse';
+import { CommentType } from '@/components/CommentBox';
+import { UUID } from "crypto";
 
 // Create a single supabase client for interacting with your database
 export const supabase = createClient<Database>(
@@ -253,4 +255,13 @@ export async function getRecentShowFavorites() : Promise<favs[] | null> {
     }
     
     return data as unknown as favs[]
+}
+
+export async function getComments(movie_id: number, show_id: number): Promise<CommentType[]> {
+    const {data, error} = await supabase.rpc("select_comments_for_content_with_info", { uid: null,  lim: 9999, off: 0, mid : movie_id, sid : show_id} as {uid : UUID | null, lim : number, off: number,  mid : number, sid:number})
+    if(error) {
+        throw error
+    }else{
+        return data
+    }
 }

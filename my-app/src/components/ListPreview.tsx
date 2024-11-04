@@ -3,6 +3,7 @@ import TMDBCClient from '@/Data/TMDB-fetch';
 import { MovieListResult } from '@/types/MovieListResponse';
 import { useEffect, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { ImageGrid } from './poster-item';
 import defualtlist from './movieicon.png';
 import Moviebox from './Moviebox';
@@ -21,84 +22,85 @@ const ListPreview = () => {
     const lst: ListWithPostersRpcResponse | undefined = location.state?.item;
     const { setShouldRefresh } = useRefresh();
     const client = new TMDBCClient();
+
+    // State to hold movies and shows
     const [movies, setMovies] = useState<MovieListResult[]>([]);
     const [shows, setShows] = useState<ShowDetailResponse[]>([]);
     const [mainPosterUrl, setMainPosterUrl] = useState(defualtlist);
     const [userList, setUserList] = useState<boolean>(false);
 
-    const getUserLists = async () => {
-        if (user?.user_id && lst) {
-            const lists = await selectListsByUserId(user.user_id);
-            setUserList(lists?.some(list => list.list_id === lst.list_id) || false);
+    // Check if the list belongs to the user
+    useQuery(['userLists', user?.user_id], async () => {
+        if (user?.user_id) {
+            return await selectListsByUserId(user.user_id);
         }
-    };
+        return [];
+    }, {
+        onSuccess: (lists) => {
+            setUserList(lists?.some(list => list.list_id === lst?.list_id) || false);
+        }
+    });
 
-    const getFavorites = async () => {
-        const favoriteMovies = await getFavoritedMoviesByUser();
-        const favoriteShows = await getFavoritedShowsByUser();
-        const fetchedMovies = [];
-        const fetchedShows = [];
+    // Fetch favorites if `lst` is undefined
+    useQuery(
+        ['favorites', user?.user_id],
+        async () => {
+            const favoriteMovies = await getFavoritedMoviesByUser();
+            const favoriteShows = await getFavoritedShowsByUser();
+            const fetchedMovies = await Promise.all(favoriteMovies.map(item => client.fetchMovieByID(item.movie_id)));
+            const fetchedShows = await Promise.all(favoriteShows.map(item => client.fetchShowByID(item.show_id)));
+            return { movies: fetchedMovies, shows: fetchedShows };
+        },
+        {
+            enabled: !lst, // Only fetch when `lst` is undefined
+            onSuccess: (data) => {
+                setMovies(data.movies);
+                setShows(data.shows);
+            }
+        }
+    );
 
-        for (const item of favoriteMovies!) {
-            const movieres = await client.fetchMovieByID(item.movie_id);
-            fetchedMovies.push(movieres);
+    // Fetch list items if `lst` is defined
+    useQuery(
+        ['listItems', lst?.list_id],
+        async () => {
+            const listItem = await selectListByID(lst!.list_id);
+            const fetchedMovies = [];
+            const fetchedShows = [];
+
+            for (const item of listItem) {
+                if (item.movie_id === -1 && item.show_id) {
+                    const showres = await client.fetchShowByID(item.show_id);
+                    fetchedShows.push(showres);
+                } else if (item.movie_id) {
+                    const movieres = await client.fetchMovieByID(item.movie_id);
+                    fetchedMovies.push(movieres);
+                }
+            }
+            return { movies: fetchedMovies, shows: fetchedShows };
+        },
+        {
+            enabled: !!lst, // Only fetch when `lst` is defined
+            onSuccess: (data) => {
+                setMovies(data.movies);
+                setShows(data.shows);
+            }
         }
-        for (const item of favoriteShows!) {
-            const showres = await client.fetchShowByID(item.show_id);
-            fetchedShows.push(showres);
-        }
-        setMovies(fetchedMovies);
-        setShows(fetchedShows);
-    };
+    );
 
     useEffect(() => {
-        const initializeListPreview = async () => {
-            if (!lst) {
-                await getFavorites();
-            } else {
-                const extractUrl = () => {
-                    if (lst.ids && lst.ids.length > 0) {
-                        const components = lst.ids[0].split(',');
-                        const url = components.find(part => part.startsWith("https"));
-                        setMainPosterUrl(url || defualtlist);
-                    }
-                };
-
-                extractUrl();
-
-                const getLists = async () => {
-                    try {
-                        const listItem = await selectListByID(lst.list_id);
-                        if (!listItem || listItem.length === 0) {
-                            console.log("No list items found.");
-                            return;
-                        }
-                        const fetchedMovies = [];
-                        const fetchedShows = [];
-
-                        for (const item of listItem) {
-                            if (item.movie_id === -1 && item.show_id) {
-                                const showres = await client.fetchShowByID(item.show_id);
-                                fetchedShows.push(showres);
-                            } else if (item.movie_id) {
-                                const movieres = await client.fetchMovieByID(item.movie_id);
-                                fetchedMovies.push(movieres);
-                            }
-                        }
-                        setMovies(fetchedMovies);
-                        setShows(fetchedShows);
-                    } catch (error) {
-                        console.error("Error fetching list items: ", error);
-                    }
-                };
-
-                await getLists();
-                await getUserLists(); // Ensure userList is set based on user ownership
-            }
-        };
-
-        initializeListPreview();
-    }, [listId, lst]);
+        // Determine main poster URL for list preview if `lst` is defined
+        if (lst) {
+            const extractUrl = () => {
+                if (lst.ids && lst.ids.length > 0) {
+                    const components = lst.ids[0].split(',');
+                    const url = components.find(part => part.startsWith("https"));
+                    setMainPosterUrl(url || defualtlist);
+                }
+            };
+            extractUrl();
+        }
+    }, [lst]);
 
     const handleDeleteMovies = (deletedMovieId: number) => {
         setMovies(currentMovies => currentMovies.filter(movie => movie.id !== deletedMovieId));
