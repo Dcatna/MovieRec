@@ -265,3 +265,82 @@ export async function getComments(movie_id: number, show_id: number): Promise<Co
         return data
     }
 }
+
+export async function insertComment(movie_id : number, show_id : number, user_id : string, created : string, comment : string) {
+    
+    if(movie_id != -1) {
+        const {error} = await supabase.from("comment").insert({
+            user_id: user_id,
+            created_at: created,
+            message: comment,
+            movie_id: movie_id,
+            show_id: -1,
+        })
+
+        if ( error) {
+            console.log(error.details)
+            return
+        }
+    }else{
+        const {error} = await supabase.from("comment").insert({
+            user_id: user_id,
+            created_at: created,
+            message: comment,
+            movie_id: -1,
+            show_id: show_id,
+        })
+
+        if(error) {
+            console.log(error)
+            return
+        }
+    }
+    
+}
+
+export async function insertReply(date : string, user_id : string, currComment : string, activeReply : number) {
+    const {error } = await supabase.from("reply").insert({
+        created_at : date, 
+        user_id : user_id, 
+        message : currComment, 
+        cid : activeReply
+    })
+
+    if (error) {
+        console.log(error)
+        return 
+    }
+}
+
+export async function getLikes(comment_id : number, ) : Promise<number> {
+    const {data, error } = await supabase.from("clikes").select("*", {count : 'exact'}).eq("cid", comment_id)
+    if(error){
+        throw error
+    }
+    return data.length
+}
+
+export async function getUserLikedComment(comment_id : number, user_id : string) : Promise<boolean> {
+    const {data, error} = await supabase.from("clikes").select("*").eq("user_id", user_id).eq("cid", comment_id)
+    if(error) {
+        throw error
+    }
+    return data.length > 0
+}
+
+export async function removeLikeByUser(comment_id : number, user_id : string) {
+    const {error} = await supabase.from("clikes").delete().eq("cid", comment_id).eq("user_id", user_id)
+    if(error) {
+        throw error
+    }
+}
+
+export async function insertLikeByUser(comment_id: number, user_id : string) {
+    const {error} = await supabase.from("clikes").insert({
+        "cid" : comment_id,
+        "user_id" : user_id
+    })
+    if(error){
+        throw error
+    }
+}

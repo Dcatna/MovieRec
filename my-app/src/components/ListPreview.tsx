@@ -23,13 +23,11 @@ const ListPreview = () => {
     const { setShouldRefresh } = useRefresh();
     const client = new TMDBCClient();
 
-    // State to hold movies and shows
     const [movies, setMovies] = useState<MovieListResult[]>([]);
     const [shows, setShows] = useState<ShowDetailResponse[]>([]);
     const [mainPosterUrl, setMainPosterUrl] = useState(defualtlist);
-    const [userList, setUserList] = useState<boolean>(false);
+    const [userList, setUserList] = useState<boolean | null>(null); // null as initial state to signify loading
 
-    // Check if the list belongs to the user
     useQuery(['userLists', user?.user_id], async () => {
         if (user?.user_id) {
             return await selectListsByUserId(user.user_id);
@@ -38,10 +36,12 @@ const ListPreview = () => {
     }, {
         onSuccess: (lists) => {
             setUserList(lists?.some(list => list.list_id === lst?.list_id) || false);
-        }
+        },
+        staleTime: 1000 * 60 * 5,
+        cacheTime: 1000 * 60 * 10,
+        retry: 1,
     });
 
-    // Fetch favorites if `lst` is undefined
     useQuery(
         ['favorites', user?.user_id],
         async () => {
@@ -52,11 +52,14 @@ const ListPreview = () => {
             return { movies: fetchedMovies, shows: fetchedShows };
         },
         {
-            enabled: !lst, // Only fetch when `lst` is undefined
+            enabled: !lst,
             onSuccess: (data) => {
                 setMovies(data.movies);
                 setShows(data.shows);
-            }
+            },
+            staleTime: 1000 * 60 * 5,
+            cacheTime: 1000 * 60 * 10,
+            retry: 1,
         }
     );
 
@@ -80,7 +83,7 @@ const ListPreview = () => {
             return { movies: fetchedMovies, shows: fetchedShows };
         },
         {
-            enabled: !!lst, // Only fetch when `lst` is defined
+            enabled: !!lst,
             onSuccess: (data) => {
                 setMovies(data.movies);
                 setShows(data.shows);
@@ -89,7 +92,6 @@ const ListPreview = () => {
     );
 
     useEffect(() => {
-        // Determine main poster URL for list preview if `lst` is defined
         if (lst) {
             const extractUrl = () => {
                 if (lst.ids && lst.ids.length > 0) {
@@ -111,6 +113,11 @@ const ListPreview = () => {
         setShows(currentShows => currentShows.filter(show => show.id !== deletedShowId));
         setShouldRefresh(true);
     };
+
+    if (userList === null) {
+        // Show a loading indicator until userList is determined
+        return <div>Loading...</div>;
+    }
 
     return (
         <div className="flex flex-col items-start p-8 bg-white shadow-md rounded-lg mx-auto">
