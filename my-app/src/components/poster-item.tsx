@@ -1,7 +1,6 @@
 import { cn } from "@/lib/utils";
 
 export const ImageGrid = ({ images }: {images: string[]}) => {
-    console.log(images, "IMAGES")
     const roundingFromIdx = (idx: number) => {
         switch(idx) {
             case 0: return "s"

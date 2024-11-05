@@ -12,6 +12,8 @@ import { cn, range } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import ScrollContainer from 'react-indiana-drag-scroll';
+import { useEffect } from "react";
+import { VidSrcNetExtractor } from "@/Data/extractors/extractor";
 const DEFAULT_LIST_USER = "c532e5da-71ca-4b4b-b896-d1d36f335149"
 const convertListItemsToResponse = (
   items: ListItem[],
@@ -49,7 +51,6 @@ export function HomePage() {
     queryKey: ["default_user"],
     queryFn: () => selectListsByUserId(DEFAULT_LIST_USER)
   });
-
 
   return (
     <div className="h-full w-full pt-12 mx-4 flex flex-col overflow-y-auto overflow-x-hidden">
