@@ -5,7 +5,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { useState, useEffect } from "react"
 import { Link, useLocation } from "react-router-dom"
 import ActorBox from "./ActorBox"
-import { showBoxProp } from "./Showbox"
 import TMDBCClient from "@/Data/TMDB-fetch"
 import { selectListsByUserId, addToListByID } from "@/Data/supabase-client"
 import { useUserStore, ListWithItems } from "@/Data/userstore"
@@ -148,11 +147,9 @@ const Showinfo = () => {
           <ActorBox actor={actor}></ActorBox>
         ))}
       </div>
-      <p className='mt-5 ml-[40px] mb-5'>Comments</p>
-        {/* <div className='ml-[45px]'>
-          {comments?.length != 0 ? <CommentBox comment={comments[0]} singleComment={true} onReplyClick={undefined} replyActive={false} refreshReplies={undefined}></CommentBox>: <div>There are no comments</div>}
-          <CommentPopup movieorshow={show.item.id} isMovie={false} ></CommentPopup>
-        </div> */}
+        <Link to={`${show.id}/comments`} state={show}>
+          <p>Comments</p>
+        </Link>
       <p className='mt-5 ml-[40px]'>Media</p>
       <div className='flex overflow-x-auto ' style={{width: '1000px', marginLeft:'40px'}}>
       {videoData?.results.length !== 0 ? (
