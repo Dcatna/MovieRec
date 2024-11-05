@@ -10,7 +10,7 @@ import { UUID } from "crypto";
 // Create a single supabase client for interacting with your database
 export const supabase = createClient<Database>(
     'https://ghasvemjqkfxpkkafnbg.supabase.co', 
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdoYXN2ZW1qcWtmeHBra2FmbmJnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDU0NTg3MzIsImV4cCI6MjAyMTAzNDczMn0.6b_ouVg6R7ubRh6N96qSfJBzr8MNlgRLWAdiJFNoyXw'
+    import.meta.env.VITE_SUPABASE_API_KEY
 );
 
 export type StoredUser = {

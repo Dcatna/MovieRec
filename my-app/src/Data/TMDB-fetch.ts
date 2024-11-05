@@ -8,7 +8,7 @@ class TMDBCClient {
 
     private reqPerMin = 50
 
-    private readonly apiKey: string = '11e1be5dc8a3cf947ce265da83199bce'
+    private readonly apiKey: string = import.meta.env.VITE_TMDB_API_KEY
     private bucket: TokenBucket = TokenBuckets
         .builder()
         .withCapacity(this.reqPerMin)
