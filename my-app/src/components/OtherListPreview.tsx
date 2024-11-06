@@ -1,69 +1,32 @@
-import { contentFrom, getFavoritedMoviesByUser, getFavoritedShowsByUser, ListWithPostersRpcResponse, selectListByID, selectListsByUserId } from '@/Data/supabase-client';
+import { contentFrom, ListWithPostersRpcResponse, selectListByID} from '@/Data/supabase-client';
 import TMDBCClient from '@/Data/TMDB-fetch';
-import { MovieListResult } from '@/types/MovieListResponse';
-import { useEffect, useState } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { ImageGrid } from './poster-item';
-import defualtlist from './movieicon.png';
-import Moviebox from './Moviebox';
-import Showbox from './Showbox';
-import { ShowDetailResponse } from '@/types/types';
-import default_favs from './default_favorite_list.jpg';
-import { useUserStore } from '@/Data/userstore';
-import { useShallow } from 'zustand/shallow';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useState } from 'react'
 import { useRefresh } from './RefreshContext';
+import { MovieListResult } from '@/types/MovieListResponse';
+import { ShowDetailResponse } from '@/types/types';
+import { useLocation, useParams } from 'react-router-dom';
+import Moviebox from './Moviebox';
+import { ImageGrid } from './poster-item';
+import Showbox from './Showbox';
+import defualtlist from './movieicon.png';
 
-const ListPreview = () => {
+const OtherListPreview = () => {
     const params = useParams();
-    const user = useUserStore(useShallow((state) => state.stored));
+    //const user = useUserStore(useShallow((state) => state.stored));
+    const { setShouldRefresh } = useRefresh();
+    const client = new TMDBCClient();
+    const queryClient = useQueryClient(); 
+    const [movies, setMovies] = useState<MovieListResult[]>([]);
+    const [shows, setShows] = useState<ShowDetailResponse[]>([]);
     const listId = params['listId'];
     const location = useLocation();
     const lst: ListWithPostersRpcResponse | undefined = location.state?.item;
-    const { setShouldRefresh } = useRefresh();
-    const client = new TMDBCClient();
-
-    const [movies, setMovies] = useState<MovieListResult[]>([]);
-    const [shows, setShows] = useState<ShowDetailResponse[]>([]);
     const [mainPosterUrl, setMainPosterUrl] = useState(defualtlist);
-    const [userList, setUserList] = useState<boolean | null>(null); // Null as initial state to signify loading
 
-    const { isLoading: userListLoading } = useQuery(['userLists', user?.user_id], async () => {
-        if (user?.user_id) {
-            return await selectListsByUserId(user.user_id);
-        }
-        return [];
-    }, {
-        onSuccess: (lists) => {
-            setUserList(lists?.some(list => list.list_id === lst?.list_id) || false);
-        },
-        staleTime: 1000 * 60 * 5,
-        cacheTime: 1000 * 60 * 10,
-        retry: 1,
-    });
 
-    const { isLoading: favoritesLoading } = useQuery(
-        ['favorites', user?.user_id],
-        async () => {
-            const favoriteMovies = await getFavoritedMoviesByUser();
-            const favoriteShows = await getFavoritedShowsByUser();
-            const fetchedMovies = await Promise.all(favoriteMovies.map(item => client.fetchMovieByID(item.movie_id)));
-            const fetchedShows = await Promise.all(favoriteShows.map(item => client.fetchShowByID(item.show_id)));
-            return { movies: fetchedMovies, shows: fetchedShows };
-        },
-        {
-            enabled: !lst,
-            onSuccess: (data) => {
-                setMovies(data.movies);
-                setShows(data.shows);
-            },
-            staleTime: 1000 * 60 * 5,
-            cacheTime: 1000 * 60 * 10,
-            retry: 1,
-        }
-    );
-
-    const { isLoading: listItemsLoading } = useQuery(
+    
+    const { data , isLoading } = useQuery(
         ['listItems', lst?.list_id],
         async () => {
             const listItem = await selectListByID(lst!.list_id);
@@ -79,7 +42,7 @@ const ListPreview = () => {
                     fetchedMovies.push(movieres);
                 }
             }
-            return { movies: fetchedMovies, shows: fetchedShows };
+            return { movies: fetchedMovies as MovieListResult[], shows: fetchedShows as ShowDetailResponse[]};
         },
         {
             enabled: !!lst,
@@ -88,7 +51,7 @@ const ListPreview = () => {
                 setShows(data.shows);
             }
         }
-    );
+    )
 
     useEffect(() => {
         if (lst) {
@@ -101,29 +64,47 @@ const ListPreview = () => {
             };
             extractUrl();
         }
-    }, [lst]);
-
+    }, [lst])
+    
     const handleDeleteMovies = (deletedMovieId: number) => {
-        setMovies(currentMovies => currentMovies.filter(movie => movie.id !== deletedMovieId));
-        setShouldRefresh(true);
+        if (data?.movies) {
+            const updatedMovies = data.movies.filter(movie => movie.id !== deletedMovieId);
+            setMovies(updatedMovies); // Update state directly for immediate UI change
+    
+            // Update the cache manually with the correct cache key
+            queryClient.setQueryData(['listItems', lst?.list_id], (old) => ({
+                ...(old as { movies: MovieListResult[], shows: ShowDetailResponse[] }),
+                movies: updatedMovies
+            }));
+            setShouldRefresh(true);
+        }
     };
-
+    
     const handleDeleteShows = (deletedShowId: number) => {
-        setShows(currentShows => currentShows.filter(show => show.id !== deletedShowId));
-        setShouldRefresh(true);
+        if (data?.shows) {
+            const updatedShows = data.shows.filter(show => show.id !== deletedShowId);
+            setShows(updatedShows); // Update state directly for immediate UI change
+    
+            // Update the cache manually with the correct cache key
+            queryClient.setQueryData(['listItems', lst?.list_id], (old) => ({
+                ...(old as { movies: MovieListResult[], shows: ShowDetailResponse[] }),
+                shows: updatedShows
+            }));
+            setShouldRefresh(true);
+        }
     };
+    
 
-    if (userListLoading || (lst ? listItemsLoading : favoritesLoading)) {
+    if (isLoading) {
         return <div>Loading...</div>;
     }
-    console.log(userList, "URS?")
-    return (
-        <div className="flex flex-col items-start p-8 bg-white shadow-md rounded-lg mx-auto">
+
+    
+  return (
+    <div className="flex flex-col items-start p-8 bg-white shadow-md rounded-lg mx-auto">
             <div className="flex items-center justify-between w-full mb-8">
                 <div className="w-40 h-40 flex-shrink-0 relative">
-                    {!lst ? (
-                        <img src={default_favs} className="w-full h-full object-cover rounded-md shadow-lg" />
-                    ) : lst.ids && lst.ids.length > 3 ? (
+                    {lst.ids && lst.ids.length > 3 ? (
                         <ImageGrid images={contentFrom(lst).map((it) => it.url)} />
                     ) : lst.ids && lst.ids.length < 4 && lst.ids[0] ? (
                         <img
@@ -141,26 +122,26 @@ const ListPreview = () => {
                         {lst == undefined ? "Favorites" : lst.name ? lst.name : "Undefined List"}
                     </p>
                     <p className="text-xl text-gray-500 mb-4">
-                        Created by {lst == undefined ? user?.username : lst.username ? lst.username : "Undefined"} - {movies.length + shows.length} items
+                        Created by {lst.username ? lst.username : "Undefined"} - {movies.length + shows.length} items
                     </p>
                 </div>
             </div>
 
             <div className="grid lg:grid-cols-4 sm:grid-cols-2 gap-6 w-full">
-                {userList !== null && movies.map((movie: MovieListResult) => (
+                {movies.map((movie: MovieListResult) => (
                     <div key={movie.id} className="flex flex-col items-center">
                         <Moviebox
                             item={movie}
                             movie_id={movie.id}
                             title={movie.title}
                             posterpath={movie.poster_path}
-                            inList={userList}
+                            inList={false}
                             list_id={listId}
                             onDelete={handleDeleteMovies}
                         />
                     </div>
                 ))}
-                {userList !== null && shows.map((show: ShowDetailResponse) => {
+                {shows.map((show: ShowDetailResponse) => {
                     const listIdToUse = lst ? listId : undefined;
                     const mappedShow = {
                         ...show,
@@ -175,7 +156,7 @@ const ListPreview = () => {
                                 show_id={mappedShow.id}
                                 title={mappedShow.title}
                                 posterpath={mappedShow.poster_path}
-                                inList={userList}
+                                inList={false}
                                 list_id={listIdToUse}
                                 onDelete={handleDeleteShows}
                             />
@@ -184,7 +165,7 @@ const ListPreview = () => {
                 })}
             </div>
         </div>
-    );
-};
+  )
+}
 
-export default ListPreview;
+export default OtherListPreview

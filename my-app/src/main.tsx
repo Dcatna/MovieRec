@@ -14,9 +14,11 @@ import SearchPage from "./Pages/Search";
 import BrowsePage from "./Pages/Browse";
 import MovieInfo from "./components/MovieInfo";
 import ShowInfo from "./components/ShowInfo";
-import ListPreview from "./components/ListPreview";
 import Recommendations from "./Pages/Recommendations";
 import CommentsPage from "./components/CommentsPage";
+import FavoritesPreview from "./components/FavoritesPreview";
+import YourListPreview from "./components/YourListPreview";
+import OtherListPreview from "./components/OtherListPreview";
 
 const router = createBrowserRouter([
   {
@@ -54,7 +56,13 @@ const router = createBrowserRouter([
         path: "showinfo", element: <ShowInfo/>
       },
       {
-        path:"home/list/:listId", element: <ListPreview/>
+        path:"home/ulist/:listId", element: <YourListPreview/>
+      },
+      {
+        path:"home/list/:listId", element: <OtherListPreview/>
+      },
+      {
+        path:"home/ulist/favorites", element: <FavoritesPreview/>
       },
       {
         path:"movieinfo/:movieId/comments", element: <CommentsPage/>

@@ -60,7 +60,7 @@ export function Sidebar({
         </div>
         <div className="grid grid-cols-1 gap-4">
           {user !== null ? 
-          <Link to={`/home/list/favorites`} state={{undefined}}>
+          <Link to={`/home/ulist/favorites`} state={{undefined}}>
             <div className="flex items-center space-x-4 rounded-lg bg-white shadow-md p-4">
               <div className="w-20 h-20 flex-shrink-0">
                 <img src={defualtFav} alt="default favorite" className="w-full h-full object-cover rounded-lg" />
@@ -73,7 +73,7 @@ export function Sidebar({
           </Link> : <div/>}
 
           {listData?.map((item: ListWithPostersRpcResponse) => (
-            <Link to={`/home/list/${item.list_id}`} state={{ item }} key={item.list_id}>
+            <Link to={`/home/ulist/${item.list_id}`} state={{ item }} key={item.list_id}>
               <div className="flex items-center space-x-4 rounded-lg bg-white shadow-md p-4">
                 <div className="w-20 h-20 flex-shrink-0">
                   {item.ids && item.ids.length > 3 ? (

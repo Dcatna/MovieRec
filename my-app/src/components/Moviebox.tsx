@@ -54,7 +54,7 @@ const Moviebox = ({movie_id, title, posterpath, item, inList, list_id, onDelete}
     async function removeMovie(event: React.MouseEvent){
         event.preventDefault(); // Prevent link navigation
         event.stopPropagation();
-        console.log(client?.user_id, "USER", item.id, list_id)
+        //console.log(client?.user_id, "USER", item.id, "DS", list_id)
         if (list_id != undefined) {
             const {data, error} = await supabase.from("listitem").delete().match({
                 movie_id: item.id, 
