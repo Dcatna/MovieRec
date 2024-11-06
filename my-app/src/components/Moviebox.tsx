@@ -6,6 +6,7 @@ import { useUserStore } from '@/Data/userstore';
 import { useShallow } from 'zustand/shallow';
 import { MovieListResult } from '@/types/MovieListResponse';
 import { supabase } from '@/Data/supabase-client';
+import { useQueryClient } from '@tanstack/react-query';
 
 export interface movieBoxProp {
     movie_id : number,
@@ -21,34 +22,44 @@ const Moviebox = ({movie_id, title, posterpath, item, inList, list_id, onDelete}
     const partial_url = "https://image.tmdb.org/t/p/original/"
     const client = useUserStore(useShallow((state) => state.stored));
     const [loaded, setLoaded] = useState(false)
-    
-    async function handleFavorites(event: React.MouseEvent, movie_id : number, title : string, posterpath: string) {
+    const queryClient = useQueryClient();
+
+    async function handleFavorites(event: React.MouseEvent, movie_id: number, title: string, posterpath: string) {
         event.preventDefault(); // Prevent link navigation
         event.stopPropagation();
-        const {data} = await supabase.from("favoritemovies").select("*").eq("movie_id", movie_id)
-        console.log(data)
-        if(data?.length == 0) {
-            const {data, error} = await supabase.from("favoritemovies").insert([{
+        
+        const { data } = await supabase.from("favoritemovies").select("*").eq("movie_id", movie_id);
+        console.log(data);
+        
+        if (data?.length === 0) {
+            const { error } = await supabase.from("favoritemovies").insert([{
                 movie_id: movie_id,
-                show_id : -1, 
+                show_id: -1, 
                 user_id: client?.user_id, 
                 poster_path: posterpath,
                 title: title,
                 overview: "",
                 vote_average: 0,
-                }])
+            }]);
+            
+            if (error) {
+                console.log(error, "hi");
+            } else {
+                // Update cache to reflect the favorite addition
+                queryClient.setQueryData(['favorites', client?.user_id], (oldData: any) => {
+                    // Ensure movies exists or default to an empty array
+                    const updatedMovies = oldData?.movies ? [...oldData.movies, item] : [item];
+                    console.log('Updating cache with movies:', updatedMovies); // Debugging log
     
-            if(error) {
-                console.log(error, "hi")
+                    return {
+                        ...oldData,
+                        movies: updatedMovies
+                    };
+                });
             }
-            else{
-                console.log(data)
-            }
+        } else {
+            console.log("MOVIE IS ALREADY FAVORITED");
         }
-        else{
-            console.log("MOVIE IS ALREADY FAVORITED")
-        }
-        
     }
 
     async function removeMovie(event: React.MouseEvent){
@@ -62,9 +73,10 @@ const Moviebox = ({movie_id, title, posterpath, item, inList, list_id, onDelete}
                 user_id: client?.user_id})
             if(error){
                 console.log(error)
-            }else{
-                console.log(data)
-                onDelete!!(item.id)
+            }else {
+                console.log(data);
+                onDelete?.(item.id);
+                queryClient.invalidateQueries(['favorites', client?.user_id]);
             }
         }else{
             const {data, error} = await supabase.from('favoritemovies').delete().match({
@@ -74,9 +86,10 @@ const Moviebox = ({movie_id, title, posterpath, item, inList, list_id, onDelete}
 
             if(error){
                 console.log(error)
-            }else{
-                console.log(data)
-                onDelete!!(item.id)
+            }else {
+                console.log(data);
+                onDelete?.(item.id);
+                queryClient.invalidateQueries(['favorites', client?.user_id]);
             }
         }
         
