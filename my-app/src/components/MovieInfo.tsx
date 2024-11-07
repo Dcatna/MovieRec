@@ -150,6 +150,9 @@ const MovieInfo = () => {
                             <ActorBox actor={actor} key={actor.id}></ActorBox>
                         ))}
                     </div>
+                    <Link to={`${movie.id}/comments`} state={movie}>
+                      <p>Comments</p>
+                    </Link>
                     <p className="mt-5 ml-[40px] mb-5">Media</p>
                     <div className="flex overflow-x-auto" style={{ width: "1000px", marginLeft: "40px" }}>
                         {videoData?.results.length !== 0 ? (

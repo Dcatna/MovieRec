@@ -2,7 +2,7 @@ import { getUserLikedComment, insertLikeByUser, removeLikeByUser, supabase } fro
 import { faHeart } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import defaultimage from "./user_default.jpg";
 import ReplyBox from "./Replybox";
 import { useUserStore } from "@/Data/userstore";
@@ -49,6 +49,12 @@ const CommentBox = ({ comment, singleComment, onReplyClick, replyActive, refresh
     const [replies, setReplies] = useState<replyType[]>([]);
     const [liked, setLiked] = useState(comment.user_liked);
     const [likeCount, setLikeCount] = useState(comment.likes);
+    const navigate = useNavigate();
+
+
+    const handleClick = () => {
+        navigate(`/profile/${comment.username}`, { state: comment });
+    }
 
     const getImageUrl = (profile_image : string | undefined) => {
         if (profile_image) {
@@ -105,15 +111,11 @@ const CommentBox = ({ comment, singleComment, onReplyClick, replyActive, refresh
 
     return (
         <div className="flex w-full">
-            {/* User Profile Link and Image */}
-            <Link to={`/home/userprofile/${comment.user_id}`} state={comment}>
+            <div onClick={handleClick} className="cursor-pointer">
                 <img className="rounded-full h-12 w-12 border-2 border-gray-300" src={image} alt="" />
-            </Link>
-
-            {/* Comment Content */}
+            </div>
             <div className="col ml-2 flex-grow">
-                {/* Username and Date */}
-                <Link to={`/home/userprofile/${comment.user_id}`} state={comment}>
+                <div onClick={handleClick} className="cursor-pointer">
                     <div className={`flex ${singleComment ? 'text-white' : 'text-black'}`}>
                         {comment.username}
                         <div className="ml-2 text-sm text-gray-500">
@@ -124,9 +126,7 @@ const CommentBox = ({ comment, singleComment, onReplyClick, replyActive, refresh
                             })}
                         </div>
                     </div>
-                </Link>
-
-                {/* Comment Message and Like Button */}
+                </div>
                 <div className={`mt-1 ${singleComment ? 'text-white' : 'text-black'} break-words w-full`}>
                     <div className="flex justify-between items-center w-full">
                         <p className="break-all flex-grow max-w-full overflow-hidden">
@@ -137,8 +137,6 @@ const CommentBox = ({ comment, singleComment, onReplyClick, replyActive, refresh
                             <span>{likeCount}</span>
                         </button>
                     </div>
-
-                    {/* Reply and Replies Toggle */}
                     <div className="mt-2">
                         <p onClick={onReplyClick} className="cursor-pointer text-blue-500">Reply</p>
                         {comment.replies > 0 && !showReplies && (

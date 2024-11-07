@@ -19,6 +19,9 @@ import CommentsPage from "./components/CommentsPage";
 import FavoritesPreview from "./components/FavoritesPreview";
 import YourListPreview from "./components/YourListPreview";
 import OtherListPreview from "./components/OtherListPreview";
+import ProtectedRoute from "./components/ProtectedRoute";
+import YourProfileScreen from "./components/YourProfileScreen";
+import OtherProfileScreen from "./components/OtherProfileScreen";
 
 const router = createBrowserRouter([
   {
@@ -47,7 +50,7 @@ const router = createBrowserRouter([
         path: 'browse', element: <BrowsePage/>
       },
       {
-        path: 'recommended', element: <Recommendations/>
+        path: 'recommended', element: <ProtectedRoute><Recommendations/></ProtectedRoute>
       },
       {
         path: "movieinfo", element: <MovieInfo/>
@@ -69,6 +72,12 @@ const router = createBrowserRouter([
       },
       {
         path:"showinfo/:showId/comments", element: <CommentsPage/>
+      },
+      {
+        path:"profile", element: <ProtectedRoute><YourProfileScreen/></ProtectedRoute>
+      },
+      {
+        path:"profile/:username", element: <OtherProfileScreen/>
       }
     ],
   },
