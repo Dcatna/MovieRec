@@ -1,6 +1,6 @@
 import { useLocation } from "react-router-dom";
 import { CommentType } from "./CommentBox";
-import { selectListsByUserId } from "@/Data/supabase-client";
+import { selectListsByUserId, supabase } from "@/Data/supabase-client";
 import { ListWithItems } from "@/Data/userstore";
 import { useEffect, useState } from "react";
 import default_image from "./user_default.jpg";
@@ -9,23 +9,29 @@ const OtherProfileScreen = () => {
     const location = useLocation();
     const userInfo: CommentType = location.state;
     const [userLists, setUserLists] = useState<ListWithItems[]>([]);
-    //const [image, setImage] = useState<string>("");
+    const [image, setImage] = useState<string>("");
 
     async function getUserLists() {
         const res = await selectListsByUserId(userInfo.user_id);
         setUserLists(res);
     }
-    // const getImageUrl = (profile_image : string | undefined) => {
-    //     if (profile_image) {
-    //         const {data} = supabase.storage.from("profile_pictures").getPublicUrl(profile_image);
-    //         if (data.publicUrl !== undefined) {
-    //             setImage(data.publicUrl);
-    //         }
-    //     } else {
-    //         setImage(defaultimage);
-    //     }
-    // }
+    const getImageUrl = (profile_image : string | undefined) => {
+        
+        if (profile_image) {
+            const {data} = supabase.storage.from("profile_pictures").getPublicUrl(profile_image)
+            
+            if(data.publicUrl != undefined){
+                setImage(data.publicUrl)
+            }
+            
+        }
+        else{
+            setImage(default_image)
+        }
+    }
+
     useEffect(() => {
+        getImageUrl(userInfo.profile_image)
         getUserLists();
     }, []);
 
@@ -35,7 +41,7 @@ const OtherProfileScreen = () => {
                 <div className="flex justify-center mb-4">
                     <img
                         className="rounded-full h-24 w-24 border-2 border-gray-300"
-                        src={userInfo.profile_image || default_image}
+                        src={image}
                         alt="Profile picture"
                     />
                 </div>
