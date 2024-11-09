@@ -1,19 +1,21 @@
-import { contentFrom, ListWithPostersRpcResponse, selectListByID} from '@/Data/supabase-client';
+import { contentFrom, deleteListById, ListWithPostersRpcResponse, selectListByID} from '@/Data/supabase-client';
 import TMDBCClient from '@/Data/TMDB-fetch';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react'
 import { useRefresh } from './RefreshContext';
 import { MovieListResult } from '@/types/MovieListResponse';
 import { ShowDetailResponse } from '@/types/types';
-import { useLocation, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import Moviebox from './Moviebox';
 import { ImageGrid } from './poster-item';
 import Showbox from './Showbox';
 import defualtlist from './movieicon.png';
+import { useUserStore } from '@/Data/userstore';
+import { useShallow } from 'zustand/shallow';
 
 const YourListPreview = () => {
     const params = useParams();
-    //const user = useUserStore(useShallow((state) => state.stored));
+    const user = useUserStore(useShallow((state) => state.stored));
     const { setShouldRefresh } = useRefresh();
     const client = new TMDBCClient();
     const queryClient = useQueryClient(); 
@@ -23,7 +25,7 @@ const YourListPreview = () => {
     const location = useLocation();
     const lst: ListWithPostersRpcResponse | undefined = location.state?.item;
     const [mainPosterUrl, setMainPosterUrl] = useState(defualtlist);
-
+    const navigate = useNavigate();
 
     
     const { data , isLoading } = useQuery(
@@ -52,6 +54,14 @@ const YourListPreview = () => {
             }
         }
     )
+
+    async function handleDelete(){
+        const res = await deleteListById(listId)
+        if(res === 0) {
+            queryClient.invalidateQueries(['user_lists', user?.user_id]);
+            navigate("/home")
+        }
+    }
 
     useEffect(() => {
         if (lst) {
@@ -101,70 +111,78 @@ const YourListPreview = () => {
 
     
   return (
-    <div className="flex flex-col items-start p-8 bg-white shadow-md rounded-lg mx-auto">
-            <div className="flex items-center justify-between w-full mb-8">
-                <div className="w-40 h-40 flex-shrink-0 relative">
-                    {lst.ids && lst.ids.length > 3 ? (
-                        <ImageGrid images={contentFrom(lst).map((it) => it.url)} />
-                    ) : lst.ids && lst.ids.length < 4 && lst.ids[0] ? (
-                        <img
-                            src={mainPosterUrl}
-                            alt=""
-                            className="w-full h-full object-cover rounded-md shadow-lg"
-                        />
-                    ) : (
-                        <img src={defualtlist} className="w-full h-full object-cover rounded-md shadow-lg" />
-                    )}
-                </div>
-
-                <div className="ml-8 flex flex-col justify-between flex-grow">
-                    <p className="text-5xl font-bold text-gray-800 mb-2">
-                        {lst == undefined ? "Favorites" : lst.name ? lst.name : "Undefined List"}
-                    </p>
-                    <p className="text-xl text-gray-500 mb-4">
-                        Created by {lst.username ? lst.username : "Undefined"} - {movies.length + shows.length} items
-                    </p>
-                </div>
+    <div className="flex flex-col items-start p-8 bg-white shadow-md rounded-lg mx-auto relative">
+        <div className="flex items-center justify-between w-full mb-8">
+            <div className="relative w-40 h-40 flex-shrink-0">
+                {lst.ids && lst.ids.length > 3 ? (
+                    <ImageGrid images={contentFrom(lst).map((it) => it.url)} />
+                ) : lst.ids && lst.ids.length < 4 && lst.ids[0] ? (
+                    <img
+                        src={mainPosterUrl}
+                        alt=""
+                        className="w-full h-full object-cover rounded-md shadow-lg"
+                    />
+                ) : (
+                    <img src={defualtlist} className="w-full h-full object-cover rounded-md shadow-lg" />
+                )}
             </div>
 
-            <div className="grid lg:grid-cols-4 sm:grid-cols-2 gap-6 w-full">
-                {movies.map((movie: MovieListResult) => (
-                    <div key={movie.id} className="flex flex-col items-center">
-                        <Moviebox
-                            item={movie}
-                            movie_id={movie.id}
-                            title={movie.title}
-                            posterpath={movie.poster_path}
+            <div className="ml-8 flex flex-col justify-between flex-grow">
+                <p className="text-5xl font-bold text-gray-800 mb-2">
+                    {lst == undefined ? "Favorites" : lst.name ? lst.name : "Undefined List"}
+                </p>
+                <p className="text-xl text-gray-500 mb-4">
+                    Created by {lst.username ? lst.username : "Undefined"} - {movies.length + shows.length} items
+                </p>
+            </div>
+            <button
+                className="absolute top-4 right-4 bg-gray-300 hover:bg-gray-200 text-black rounded-md p-2 shadow-sm focus:outline-none"
+                onClick={handleDelete}
+            >
+                Delete List
+            </button>
+        </div>
+
+        <div className="grid lg:grid-cols-4 sm:grid-cols-2 gap-6 w-full">
+            {movies.map((movie: MovieListResult) => (
+                <div key={movie.id} className="flex flex-col items-center">
+                    <Moviebox
+                        item={movie}
+                        movie_id={movie.id}
+                        title={movie.title}
+                        posterpath={movie.poster_path}
+                        inList={true}
+                        list_id={listId}
+                        onDelete={handleDeleteMovies}
+                    />
+                </div>
+            ))}
+            {shows.map((show: ShowDetailResponse) => {
+                const listIdToUse = lst ? listId : undefined;
+                const mappedShow = {
+                    ...show,
+                    title: show.name || "",
+                    genre_ids: show.genres ? show.genres.map((genre) => genre.id) : []
+                };
+
+                return (
+                    <div key={show.id} className="flex flex-col items-center">
+                        <Showbox
+                            item={mappedShow}
+                            show_id={mappedShow.id}
+                            title={mappedShow.title}
+                            posterpath={mappedShow.poster_path}
                             inList={true}
-                            list_id={listId}
-                            onDelete={handleDeleteMovies}
+                            list_id={listIdToUse}
+                            onDelete={handleDeleteShows}
                         />
                     </div>
-                ))}
-                {shows.map((show: ShowDetailResponse) => {
-                    const listIdToUse = lst ? listId : undefined;
-                    const mappedShow = {
-                        ...show,
-                        title: show.name || "",
-                        genre_ids: show.genres ? show.genres.map((genre) => genre.id) : []
-                    };
-
-                    return (
-                        <div key={show.id} className="flex flex-col items-center">
-                            <Showbox
-                                item={mappedShow}
-                                show_id={mappedShow.id}
-                                title={mappedShow.title}
-                                posterpath={mappedShow.poster_path}
-                                inList={true}
-                                list_id={listIdToUse}
-                                onDelete={handleDeleteShows}
-                            />
-                        </div>
-                    );
-                })}
-            </div>
+                );
+            })}
         </div>
+    </div>
+
+
   )
 }
 

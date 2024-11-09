@@ -1,6 +1,6 @@
 import { createClient, Session, User } from '@supabase/supabase-js'
 import { Database } from './supabase'
-import { ListItem, ListWithItems } from './userstore';
+import { ListItem, ListWithItems } from './userstore'
 import { movieBoxProp } from '@/components/Moviebox';
 import { favs } from '@/types/types';
 import { ShowListResult } from '@/types/MovieListResponse';
@@ -342,5 +342,41 @@ export async function insertLikeByUser(comment_id: number, user_id : string) {
     })
     if(error){
         throw error
+    }
+}
+
+export async function deleteListById(list_id : string){
+    const {error} = await supabase.from("userlist").delete().match({"list_id" : list_id})
+    if(error){
+        throw error
+    }
+    else{
+        return 0
+    }
+}
+
+export async function publicToggleByListId(list_id: string) {
+    const { data, error } = await supabase
+        .from("userlist")
+        .select("public")
+        .eq("list_id", list_id)
+        .single()
+
+    if (error) {
+        throw error
+    } else {
+        const currentStatus = data.public
+        const newStatus = !currentStatus
+
+        const { error: updateError } = await supabase
+            .from("userlist")
+            .update({ public: newStatus })
+            .eq("list_id", list_id)
+
+        if (updateError) {
+            throw updateError
+        } else {
+            return 0
+        }
     }
 }
