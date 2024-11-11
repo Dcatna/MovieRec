@@ -1,19 +1,21 @@
-import { ListWithItems, useUserStore } from "@/Data/userstore";
+import { useUserStore } from "@/Data/userstore";
 import { useShallow } from "zustand/shallow";
 import default_image from "./user_default.jpg";
 import { useEffect, useState } from "react";
-import { deleteListById, publicToggleByListId, selectListsByUserId } from "@/Data/supabase-client";
+import { deleteListById, ListWithPostersRpcResponse, publicToggleByListId, selectListsByIdsWithPoster } from "@/Data/supabase-client";
 import { FaTrashAlt, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useQueryClient } from "@tanstack/react-query";
+import { Link, useNavigate } from "react-router-dom";
 
 const YourProfileScreen = () => {
   const user = useUserStore(useShallow((state) => state.stored));
-  const [userLists, setUserLists] = useState<ListWithItems[]>([]);
+  const [userLists, setUserLists] = useState<ListWithPostersRpcResponse[]>([]);
   const queryClient = useQueryClient();
-
+  const navigate = useNavigate();
+  
   useEffect(() => {
     const fetchUserLists = async () => {
-      const res = await selectListsByUserId(user.user_id);
+      const res = await selectListsByIdsWithPoster(user.user_id);
       setUserLists(res);
     };
     fetchUserLists();
@@ -22,24 +24,19 @@ const YourProfileScreen = () => {
   async function handleDelete(list_id) {
     const res = await deleteListById(list_id);
     if (res === 0) {
-      // Invalidate the cache or refetch the lists
       queryClient.invalidateQueries(['user_lists', user?.user_id]);
       setUserLists((prevLists) => prevLists.filter((list) => list.list_id !== list_id));
+      navigate("/profile")
     }
   }
 
   async function handleVisibilityToggle(list_id) {
-    // Toggle visibility in the database
     await publicToggleByListId(list_id);
-
-    // Update visibility in the local state
     setUserLists((prevLists) =>
       prevLists.map((list) =>
         list.list_id === list_id ? { ...list, public: !list.public } : list
       )
     );
-
-    // Optionally, invalidate the cache to refetch data if needed
     queryClient.invalidateQueries(['user_lists', user?.user_id]);
   }
 
@@ -63,12 +60,12 @@ const YourProfileScreen = () => {
         
         <div className="space-y-4">
           {userLists.length > 0 ? (
-            userLists.map((list) => (
+            userLists.map((list : ListWithPostersRpcResponse) => (
+              <Link to={`/home/ulist/${list.list_id}`} state={{ item: list }} key={list.list_id}>
               <div key={list.list_id} className="bg-gray-50 rounded-md p-4 shadow-md flex items-center justify-between">
                 <div>
                   <h3 className="text-lg font-medium text-gray-800">{list.name}</h3>
                   <p className="text-gray-600 text-sm mt-1">{list.description || "No description provided"}</p>
-                  <p className="text-gray-800 text-sm mt-1">{list.listitem.length} Items</p>
                 </div>
 
                 <div className="flex items-center space-x-2">
@@ -79,8 +76,6 @@ const YourProfileScreen = () => {
                   >
                     <FaTrashAlt size={16} />
                   </button>
-
-                  {/* Visibility toggle */}
                   <button
                     onClick={() => handleVisibilityToggle(list.list_id)}
                     className="text-gray-500 hover:text-gray-700"
@@ -90,6 +85,7 @@ const YourProfileScreen = () => {
                   </button>
                 </div>
               </div>
+              </Link>
             ))
           ) : (
             <p className="text-center text-gray-500">You have no lists yet.</p>

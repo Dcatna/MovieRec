@@ -24,6 +24,7 @@ const YourListPreview = () => {
     const listId = params['listId'];
     const location = useLocation();
     const lst: ListWithPostersRpcResponse | undefined = location.state?.item;
+    console.log(lst, "PASSED")
     const [mainPosterUrl, setMainPosterUrl] = useState(defualtlist);
     const navigate = useNavigate();
 
@@ -75,35 +76,47 @@ const YourListPreview = () => {
             extractUrl();
         }
     }, [lst])
+    useEffect(() => {
+        if (data) {
+            setMovies(data.movies);
+            setShows(data.shows);
+            console.log("Updated movies and shows to:", data.movies, data.shows);
+        }
+    }, [data]); // Ensure movies and shows are reset whenever `data` changes
     
     const handleDeleteMovies = (deletedMovieId: number) => {
         if (data?.movies) {
             const updatedMovies = data.movies.filter(movie => movie.id !== deletedMovieId);
-            setMovies(updatedMovies); // Update state directly for immediate UI change
+            setMovies(updatedMovies);
     
-            // Update the cache manually with the correct cache key
             queryClient.setQueryData(['listItems', lst?.list_id], (old) => ({
                 ...(old as { movies: MovieListResult[], shows: ShowDetailResponse[] }),
                 movies: updatedMovies
             }));
             setShouldRefresh(true);
+            queryClient.invalidateQueries(['listItems', lst.list_id]);
+            console.log(queryClient.getQueryData(['listItems', listId]));
         }
     };
     
     const handleDeleteShows = (deletedShowId: number) => {
         if (data?.shows) {
             const updatedShows = data.shows.filter(show => show.id !== deletedShowId);
-            setShows(updatedShows); // Update state directly for immediate UI change
+            setShows(updatedShows);
     
-            // Update the cache manually with the correct cache key
             queryClient.setQueryData(['listItems', lst?.list_id], (old) => ({
                 ...(old as { movies: MovieListResult[], shows: ShowDetailResponse[] }),
                 shows: updatedShows
             }));
             setShouldRefresh(true);
+            queryClient.invalidateQueries(['listItems', listId]);
+            console.log(queryClient.getQueryData(['listItems', listId]));
+
+
         }
     };
-    
+    const imageGridKey = `${movies.length}-${shows.length}`;
+
 
     if (isLoading) {
         return <div>Loading...</div>;
@@ -115,7 +128,7 @@ const YourListPreview = () => {
         <div className="flex items-center justify-between w-full mb-8">
             <div className="relative w-40 h-40 flex-shrink-0">
                 {lst.ids && lst.ids.length > 3 ? (
-                    <ImageGrid images={contentFrom(lst).map((it) => it.url)} />
+                     <ImageGrid key={imageGridKey} images={contentFrom(lst).map((it) => it.url)} />
                 ) : lst.ids && lst.ids.length < 4 && lst.ids[0] ? (
                     <img
                         src={mainPosterUrl}

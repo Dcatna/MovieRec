@@ -11,6 +11,7 @@ import { addToListByID, selectListsByUserId } from "@/Data/supabase-client";
 import { ListWithItems, useUserStore } from "@/Data/userstore";
 import { useShallow } from "zustand/shallow";
 import { useRefresh } from "./RefreshContext";
+import { useQueryClient } from "@tanstack/react-query";
 
 const partial_url = "https://image.tmdb.org/t/p/original/";
 
@@ -20,6 +21,7 @@ const MovieInfo = () => {
 
     const location = useLocation();
     const movieProp = location.state as movieBoxProp;
+    const queryClient = useQueryClient(); 
 
     const [movie, setMovie] = useState<MovieListResult | null>(null);
     const tmdbclient = new TMDBCClient();
@@ -109,6 +111,9 @@ const MovieInfo = () => {
                                     onClick={() => {
                                         addToListByID(list.list_id, movieProp, undefined, client);
                                         setShouldRefresh(true);
+                                        queryClient.invalidateQueries(['user_lists', client?.user_id]); // Replace with your query key
+
+                                        setIsDropdownOpen(false)
                                     }}
                                     className="cursor-pointer hover:bg-gray-200 py-2 px-4 block whitespace-no-wrap transition-colors duration-200"
                                 >
