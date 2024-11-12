@@ -67,7 +67,7 @@ export function Sidebar({
           </Link> : <div/>}
 
           {listData?.map((item: ListWithPostersRpcResponse) => (
-            <Link to={`/home/ulist/${item.list_id}`} state={{ item }} key={item.list_id}>
+            <Link to={`/home/ulist/${item.list_id}`} state={{ item }}>
               <div className="flex items-center space-x-4 rounded-lg bg-white shadow-md p-4">
                 <div className="w-20 h-20 flex-shrink-0">
                   {item.ids && item.ids.length > 3 ? (

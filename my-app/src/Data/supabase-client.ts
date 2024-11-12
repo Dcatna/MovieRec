@@ -161,6 +161,7 @@ export async function selectListByListIDwithPoster(listId: string): Promise<List
         console.error("Supabase RPC error:", error)
         throw new Error("Network response was not ok: " + error.message)
     } else {
+        
         return data as unknown as ListWithPostersRpcResponse
     }
 }
@@ -379,4 +380,8 @@ export async function publicToggleByListId(list_id: string) {
             return 0
         }
     }
+}
+
+export async function updateUserProfileImage(user_id : string, imageurl : string){
+
 }

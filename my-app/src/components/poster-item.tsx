@@ -19,6 +19,7 @@ export const ImageGrid = ({ images }: {images: string[]}) => {
                   src={image}
                   alt={`Image ${i + 1}`}
                   className={cn(`overflow-clip object-cover aspect-square rounded-${roundingFromIdx(i)}-lg`)}
+                  key={image}
               />
             ))}
         </div>
