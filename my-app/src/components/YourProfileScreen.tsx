@@ -15,8 +15,8 @@ const YourProfileScreen = () => {
   
   useEffect(() => {
     const fetchUserLists = async () => {
-      const res = await selectListsByIdsWithPoster(user.user_id);
-      setUserLists(res);
+      const res = await selectListsByIdsWithPoster(user.user_id)
+      setUserLists(res)
     };
     fetchUserLists();
   }, [user.user_id]);

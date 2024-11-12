@@ -32,12 +32,6 @@ export function Sidebar({
     refetchOnWindowFocus: true,
   });
 
-  // const { data: favoriteMoviesData, refetch: refetchFavoriteMovies } = useQuery({
-  //   queryKey: ['favoritemovies', user?.user_id],
-  //   queryFn: async () => await getFavoritedMoviesByUser(),
-  //   refetchOnWindowFocus: true,
-  // });
-  // Effect to handle refetching when shouldRefresh is true
  useEffect(() => {
     if (shouldRefresh) {
         refetch(); // Refetch the lists

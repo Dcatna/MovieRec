@@ -111,9 +111,9 @@ const MovieInfo = () => {
                                     onClick={() => {
                                         addToListByID(list.list_id, movieProp, undefined, client);
                                         setShouldRefresh(true);
-                                        queryClient.invalidateQueries(['user_lists', client?.user_id]); // Replace with your query key
+                                        queryClient.invalidateQueries(['user_lists', client?.user_id])
 
-                                        setIsDropdownOpen(false)
+                                        //setIsDropdownOpen(false)
                                     }}
                                     className="cursor-pointer hover:bg-gray-200 py-2 px-4 block whitespace-no-wrap transition-colors duration-200"
                                 >

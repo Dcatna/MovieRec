@@ -1,4 +1,4 @@
-import { contentFrom, deleteListById, ListWithPostersRpcResponse, selectListByID} from '@/Data/supabase-client';
+import { contentFrom, deleteListById, ListWithPostersRpcResponse, selectListByID } from '@/Data/supabase-client';
 import TMDBCClient from '@/Data/TMDB-fetch';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react'
@@ -82,9 +82,17 @@ const YourListPreview = () => {
             setShows(data.shows);
             console.log("Updated movies and shows to:", data.movies, data.shows);
         }
-    }, [data]); // Ensure movies and shows are reset whenever `data` changes
+    }, [data])
+
+    // const refetchListData = async () => {
+    //     const updatedLst = await selectListByListIDwithPoster(listId);
+    //     setLst(updatedLst);
+        
+    //     const newUrl = updatedLst.ids[0]?.split(',').find(part => part.startsWith("https")) || defualtlist;
+    //     setMainPosterUrl(newUrl);
+    // };
     
-    const handleDeleteMovies = (deletedMovieId: number) => {
+    const handleDeleteMovies = async (deletedMovieId: number) => {
         if (data?.movies) {
             const updatedMovies = data.movies.filter(movie => movie.id !== deletedMovieId);
             setMovies(updatedMovies);
@@ -95,11 +103,13 @@ const YourListPreview = () => {
             }));
             setShouldRefresh(true);
             queryClient.invalidateQueries(['listItems', lst.list_id]);
+            await queryClient.invalidateQueries(['user_lists', user?.user_id]);
+
             console.log(queryClient.getQueryData(['listItems', listId]));
         }
     };
     
-    const handleDeleteShows = (deletedShowId: number) => {
+    const handleDeleteShows = async (deletedShowId: number) => {
         if (data?.shows) {
             const updatedShows = data.shows.filter(show => show.id !== deletedShowId);
             setShows(updatedShows);
@@ -110,6 +120,8 @@ const YourListPreview = () => {
             }));
             setShouldRefresh(true);
             queryClient.invalidateQueries(['listItems', listId]);
+            await queryClient.invalidateQueries(['user_lists', user?.user_id]);
+
             console.log(queryClient.getQueryData(['listItems', listId]));
 
 

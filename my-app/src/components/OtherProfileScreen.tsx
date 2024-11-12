@@ -1,19 +1,18 @@
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { CommentType } from "./CommentBox";
-import { selectListsByUserId, supabase } from "@/Data/supabase-client";
-import { ListWithItems } from "@/Data/userstore";
+import { ListWithPostersRpcResponse, selectListsByIdsWithPoster, supabase } from "@/Data/supabase-client";
 import { useEffect, useState } from "react";
 import default_image from "./user_default.jpg";
 
 const OtherProfileScreen = () => {
     const location = useLocation();
     const userInfo: CommentType = location.state;
-    const [userLists, setUserLists] = useState<ListWithItems[]>([]);
+    const [userLists, setUserLists] = useState<ListWithPostersRpcResponse[]>([]);
     const [image, setImage] = useState<string>("");
 
     async function getUserLists() {
-        const res = await selectListsByUserId(userInfo.user_id);
-        setUserLists(res);
+        const res = await selectListsByIdsWithPoster(userInfo.user_id)
+        setUserLists(res)
     }
     const getImageUrl = (profile_image : string | undefined) => {
         
@@ -58,9 +57,11 @@ const OtherProfileScreen = () => {
                     <ul className="space-y-3">
                         {userLists.length > 0 ? (
                             userLists.map((list) => (
-                                <li key={list.list_id} className="bg-gray-50 p-3 rounded-md shadow-sm">
-                                    <p className="text-gray-800 font-medium">{list.name}</p>
-                                </li>
+                                <Link to={`/home/list/${list.list_id}`} state={{item : list}}>
+                                    <li key={list.list_id} className="bg-gray-50 p-3 rounded-md shadow-sm">
+                                        <p className="text-gray-800 font-medium">{list.name}</p>
+                                    </li>
+                                </Link>
                             ))
                         ) : (
                             <p className="text-gray-500 text-center">No lists available</p>
