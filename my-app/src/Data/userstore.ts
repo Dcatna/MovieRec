@@ -2,6 +2,10 @@ import { User } from "@supabase/supabase-js";
 import { create } from "zustand";
 import {
   getUserById,
+  ListWithPostersRpcResponse,
+  selectListByIdWithItems,
+  selectListsByIdsWithPoster,
+  selectListsByIdWithPosters,
   selectListsByUserId,
   signInWithEmailAndPassword,
   StoredUser,
@@ -32,6 +36,17 @@ export type ListWithItems = {
   listitem: ListItem[] | undefined;
 };
 
+export type UserList = {
+  list_id: string;
+  user_id: string;
+  name: string;
+  description: string;
+  created_at: string;
+  updated_at: string | undefined;
+  public: Boolean;
+  subscribers: number;
+}
+
 type UserData = {
   user: User;
   stored: StoredUser;
@@ -48,7 +63,7 @@ export type ContentItem = {
 
 export interface UserStore {
   userdata: UserData | undefined;
-  lists: ListWithItems[];
+  lists: ListWithPostersRpcResponse[];
   favorites: ContentItem[];
   signIn: (email: string, password: string) => Promise<boolean>;
   refreshUserLists: () =>  Promise<void>;
@@ -115,7 +130,7 @@ export const useUserStore = create<UserStore>((set, get) => ({
         return 
       }
 
-      const result = await selectListsByUserId(userId)
+      const result = await selectListsByIdsWithPoster(userId)
       if (!result.ok) {
         return
       }

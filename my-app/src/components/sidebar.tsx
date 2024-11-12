@@ -31,6 +31,7 @@ import {
 } from "./ui/dialog";
 import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
 import { Label } from "./ui/label";
+import { contentFrom } from "@/Data/supabase-client";
 
 export interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -90,11 +91,7 @@ export function Sidebar({ className }: SidebarProps) {
           )}
 
           {lists.map((item) => {
-            const images =
-              item.listitem
-                ?.slice(0, 4)
-                .map((it) => it.poster_path)
-                .filter((it) => it !== undefined) ?? [];
+            const images = contentFrom(item)?.map(it => it.url) ?? []
             return (
               <Link to={`/list/${item.list_id}`} state={{ item }}>
                 <div className="flex items-center space-x-4 rounded-lg bg-white shadow-md p-4">

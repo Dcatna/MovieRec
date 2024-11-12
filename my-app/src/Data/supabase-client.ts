@@ -39,6 +39,10 @@ export function contentFrom(data: ListWithPostersRpcResponse) {
   return data.ids?.map((it) => {
     const split = it.split(",");
 
+    if (split.length !== 3) {
+      return undefined
+    }
+
     const showId = split[0];
     const movieId = split[1];
 
@@ -47,9 +51,9 @@ export function contentFrom(data: ListWithPostersRpcResponse) {
     return {
       isMovie: isMovie,
       movidId: isMovie ? movieId : showId,
-      url: split[split.length - 1],
+      url: split[2],
     };
-  });
+  }).filter(it => it !== undefined);
 }
 
 export async function supabaseSignOut(): Promise<boolean> {
