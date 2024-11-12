@@ -1,50 +1,41 @@
 import { Outlet } from "react-router-dom";
-import { useShallow } from "zustand/shallow";
 import { useUserStore } from "./Data/userstore";
 import { useEffect, useRef } from "react";
 import { Sidebar } from "./components/sidebar";
 import Navbar from "./components/Navbar";
 import { RefreshProvider } from "./components/RefreshContext";
 import { ScrollProvider } from "./ScrollContext";
+import { cn } from "./lib/utils";
 
 function App() {
-  const user = useUserStore(useShallow((state) => state.stored));
-  const signOut = useUserStore((state) => state.signOut);
-  const refreshUser = useUserStore((state) => state.refreshUser);
-  const refreshPlaylists = useUserStore((state) => state.refreshPlaylists);
-  const playlists = useUserStore(useShallow((state) => state.playlists));
+  const subscribe = useUserStore(state => state.init)
   const scrollAreaRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    refreshUser();
-    refreshPlaylists();
-  }, [refreshUser, refreshPlaylists]);
+    const unsubscribe = subscribe()
+    return () => {
+      unsubscribe()
+    }
+  }, []);
 
   return (
     <RefreshProvider>
-      <div className="bg-background min-h-screen flex flex-col">
-        
+      <div className="bg-background max-h-screen overflow-hidden flex flex-col">
         <Navbar />
-
-        <div className="grid grid-cols-5 flex-grow">
-          <div className="hidden lg:block max-h-screen">
-            <Sidebar
-              signOut={signOut}
-              user={user}
-              refreshPlaylist={refreshPlaylists}
-              playlists={playlists}
-              onDeletePlaylist={() => {}}
-              className="max-h-screen min-h-screen"
-            />
-          </div>
-
-          <div className="col-span-full lg:col-span-4 lg:border-l flex flex-col overflow-y-auto">
-            <div ref={scrollAreaRef} className="flex flex-col overflow-y-auto">
-              <div className="flex-grow">
-                <ScrollProvider provideRef={scrollAreaRef}>
-                  <Outlet />
-                </ScrollProvider>
-              </div>
+        <div className="grid lg:grid-cols-5">
+          <Sidebar
+            className="hidden lg:block max-h-screen overflow-hidden"
+          />
+          <div
+            className={cn(`col-span-3 lg:col-span-4 lg:border-l`,"max-h-[calc(100vh)]")}
+          >
+            <div
+              ref={scrollAreaRef}
+              className={`h-full overflow-y-auto overflow-x-hidden`}
+            >
+              <ScrollProvider provideRef={scrollAreaRef}>
+                <Outlet />
+              </ScrollProvider>
             </div>
           </div>
         </div>

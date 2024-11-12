@@ -20,7 +20,7 @@ export interface showBoxProp {
 
 const Showbox = ({ show_id, title, posterpath, item, inList, list_id, onDelete }: showBoxProp) => {
     const partial_url = "https://image.tmdb.org/t/p/original/"
-    const client = useUserStore(useShallow((state) => state.stored))
+    const client = useUserStore(useShallow((state) => state.userdata?.stored))
     const queryClient = useQueryClient();
 
     async function handleFavorites(event: React.MouseEvent, show_id: number, title: string, posterpath: string) {
@@ -100,7 +100,7 @@ const Showbox = ({ show_id, title, posterpath, item, inList, list_id, onDelete }
                     </button>
                 }
             </div>
-            <Link to={'/showinfo'} state={{ item }}>
+            <Link to={`/show/${show_id}`} state={{ item }}>
                 <div className='relative'>
                     <img
                         className="w-full h-full rounded-md animate-in"

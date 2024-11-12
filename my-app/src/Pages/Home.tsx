@@ -8,11 +8,12 @@ import {
   selectListsByUserId,
 } from "@/Data/supabase-client.ts";
 import { ListItem, ListWithItems } from "@/Data/userstore";
-import { cn, range } from "@/lib/utils";
+import { cn, getOrThrow, range } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import ScrollContainer from 'react-indiana-drag-scroll';
-const DEFAULT_LIST_USER = "c532e5da-71ca-4b4b-b896-d1d36f335149"
+const DEFAULT_LIST_USER = "db72d39e-3d57-4ff9-b16b-84cfacc62d43"
+
 const convertListItemsToResponse = (
   items: ListItem[],
   listInfo: Partial<ListWithPostersRpcResponse>
@@ -47,7 +48,7 @@ export function HomePage() {
   
   const defaultList = useQuery({
     queryKey: ["default_user"],
-    queryFn: () => selectListsByUserId(DEFAULT_LIST_USER)
+    queryFn: async () => getOrThrow(await selectListsByUserId(DEFAULT_LIST_USER))
   });
 
 
@@ -108,6 +109,10 @@ function DefaultListListing(
     return (<div>{error.toString()}</div>)
   }
 
+  if((data?.length ?? 0) === 0) {
+    <text>No content created </text>
+  }
+
   return (
     <div className={className}>
       {data?.map((list) => {
@@ -122,6 +127,7 @@ function DefaultListListing(
           profile_image: "",
         });
   
+
         return (
           <div className="flex flex-col" key={convertedList.list_id}>
             <div className="flex flex-col">
@@ -139,24 +145,7 @@ function DefaultListListing(
             >
               {list.listitem?.map((item, index) => (
                 <Link
-                  to={item.movie_id !== -1 ? `/movieinfo` : `/showinfo`}
-                  state={
-                    item.movie_id === -1
-                      ? { // Show state
-                          show_id: item.show_id,
-                          title: item.title || undefined,
-                          posterpath: item.poster_path || undefined,
-                          item: item || undefined, // Pass the whole item if available
-                          type: "show" // Additional flag to specify type
-                        }
-                      : { // Movie state
-                          movie_id: item.movie_id,
-                          title: item.title || undefined,
-                          posterpath: item.poster_path || undefined,
-                          item: item || undefined, // Pass the whole item if available
-                          type: "movie" // Additional flag to specify type
-                        }
-                  }
+                  to={item.movie_id !== -1 ? `/movie/${item.movie_id}` : `/show/${item.show_id}`}
                   key={index}
                 >
                   <div className="flex flex-col me-2">
@@ -211,6 +200,10 @@ function UserCreatedListListing({
     return <div>{error.toString()}</div>;
   }
 
+  if((data?.length ?? 0) === 0) {
+    <text>No content created </text>
+  }
+
   return (
     <div className="flex flex-col">
       <h1 className="mb-2 text-3xl font-semibold tracking-tight">
@@ -220,7 +213,7 @@ function UserCreatedListListing({
       {data?.map((item) => {
         return (
           <div className="w-ful l">
-            <Link to={`/home/list/${item.list_id}`} state={{ item }} key={item.list_id}>
+            <Link to={`/list/${item.list_id}`} state={{ item }} key={item.list_id}>
               <ListPreviewItem
                 className="p-2 max-w-full overflow-hidden"
                 title={item.name}

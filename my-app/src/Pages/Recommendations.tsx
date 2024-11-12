@@ -1,11 +1,10 @@
-import Moviebox from "@/components/Moviebox";
-import Showbox from "@/components/Showbox";
+import ContentListItem from "@/components/Moviebox";
 import {
     getRecentMovieFavorites,
     getRecentShowFavorites,
 } from "@/Data/supabase-client";
-import TMDBCClient from "@/Data/TMDB-fetch";
-import { MovieListResult, ShowListResult } from "@/types/MovieListResponse";
+import {tmdbClient as client} from '@/Data/TMDB-fetch';
+import { type MovieListResult, type ShowListResult } from "@/types/MovieListResponse";
 import { ShowDetailResponse } from "@/types/types";
 import { useEffect, useState, useRef } from "react";
 
@@ -25,11 +24,9 @@ const Recommendations = () => {
     const uniqueMovies = useRef(new Set<number>());
     const uniqueShows = useRef(new Set<number>());
 
-    const client = new TMDBCClient();
-
     const getRecentMovieFavs = async () => {
         const favsres = await getRecentMovieFavorites();
-        const movies = [];
+        const movies: MovieListResult[] = [];
         if (favsres == null) {
             console.log("Have to favorite movies");
         } else {
@@ -43,7 +40,7 @@ const Recommendations = () => {
 
     const getRecentShowFavs = async () => {
         const favsres = await getRecentShowFavorites();
-        const shows = [];
+        const shows: ShowDetailResponse[] = [];
         if (favsres == null) {
             console.log("Have to favorite shows");
         } else {
@@ -176,26 +173,32 @@ const Recommendations = () => {
                     recommendedMovies.length === 0 ? (
                         <p>No movie recommendations available</p>
                     ) : (
-                        recommendedMovies.map((recItem) => (
-                            <div key={`recommended-movie-${recItem.id}`}>
-                                <Moviebox
-                                    movie_id={recItem.id}
-                                    title={recItem.title}
-                                    posterpath={recItem.poster_path}
-                                    item={recItem} inList={false} list_id={undefined}                                />
+                        recommendedMovies.map((item) => (
+                            <div key={`recommended-movie-${item.id}`}>
+                                <ContentListItem
+                                    contentId={item.id}
+                                    isMovie={true}
+                                    description={item.overview}
+                                    title={item.title} 
+                                    posterUrl={item.backdrop_path} 
+                                    favorite={false}                                   
+                                />
                             </div>
                         ))
                     )
                 ) : recommendedShows.length === 0 ? (
                     <p>No show recommendations available</p>
                 ) : (
-                    recommendedShows.map((recItem) => (
-                        <div key={`recommended-show-${recItem.id}`}>
-                            <Showbox
-                                show_id={recItem.id}
-                                title={recItem.name}
-                                posterpath={recItem.poster_path}
-                                item={recItem} inList={false} list_id={undefined}                            />
+                    recommendedShows.map((item) => (
+                        <div key={`recommended-show-${item.id}`}>
+                            <ContentListItem
+                                    contentId={item.id}
+                                    isMovie={false}
+                                    description={item.overview}
+                                    title={item.original_name} 
+                                    posterUrl={item.backdrop_path ?? ""} 
+                                    favorite={false}                                   
+                            />
                         </div>
                     ))
                 )}

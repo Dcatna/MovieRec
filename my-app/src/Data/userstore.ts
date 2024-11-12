@@ -1,12 +1,13 @@
-import { Session, User } from "@supabase/supabase-js";
+import { User } from "@supabase/supabase-js";
 import { create } from "zustand";
 import {
   getUserById,
   selectListsByUserId,
   signInWithEmailAndPassword,
   StoredUser,
-  supabaseSignOut,
+  supabase,
 } from "./supabase-client";
+import { failureResult, Result, successResult } from "@/lib/utils";
 
 export type ListItem = {
   list_id: string;
@@ -31,84 +32,184 @@ export type ListWithItems = {
   listitem: ListItem[] | undefined;
 };
 
-export interface UserState {
-  playlists: ListWithItems[];
-  user: {
-    user: User;
-    session: Session;
-  } | null;
-  stored: StoredUser | null;
+type UserData = {
+  user: User;
+  stored: StoredUser;
+}
+
+export type ContentItem = { 
+  isMovie: boolean,
+  id: number,
+  name: string,
+  description: string,
+  favorite: boolean,
+  posterUrl: string | undefined,
+}
+
+export interface UserStore {
+  userdata: UserData | undefined;
+  lists: ListWithItems[];
+  favorites: ContentItem[];
   signIn: (email: string, password: string) => Promise<boolean>;
-  refreshPlaylists: () => void;
-  refreshUser: () => void;
-  signOut: () => void
+  refreshUserLists: () =>  Promise<void>;
+  refreshUser: () =>  Promise<void>;
+  refreshFavorites: () =>  Promise<void>;
+  signOut: () => Promise<void>
+  init: () => () => void 
+  toggleItemFavorite: (item: ContentItem) => Promise<void>
 }
 
-const getStoredUser = () => {
-    try {
-        return JSON.parse(localStorage.getItem("user") ?? "") as {
-            user: User;
-            session: Session;
+
+export const useUserStore = create<UserStore>((set, get) => ({
+  userdata: undefined,
+  lists: [],
+  favorites: [],
+  init: () => {
+      const { data } = supabase.auth.onAuthStateChange((event, session) => {
+        console.log(event, session)
+
+        if (event === 'INITIAL_SESSION') {
+          // handle initial session
+        } else if (event === 'SIGNED_IN') {
+          // handle sign in event
+          get().refreshUser().then(() => {
+            get().refreshUserLists()
+            get().refreshFavorites()
+          })
+        } else if (event === 'SIGNED_OUT') {
+          set({
+            userdata: undefined,
+            lists: [],
+            favorites: []
+          })
+        } else if (event === 'PASSWORD_RECOVERY') {
+          // handle password recovery event
+        } else if (event === 'TOKEN_REFRESHED') {
+          // handle token refreshed event
+        } else if (event === 'USER_UPDATED') {
+          // handle user updated event
+          get().refreshUser()
         }
-    } catch {
-        return null
-    }
-}
+      })
 
-const getStored = () => {
-    try {
-        return JSON.parse(localStorage.getItem("stored") ?? "") as StoredUser
-    } catch {
-        return null
-    }
-}
 
-export const useUserStore = create<UserState>((set, get) => ({
-  playlists: [],
-  user: getStoredUser(),
-  stored: getStored(),
-  refreshPlaylists: async () => {
-    const user = get().user;
-    if (user) {
-      const playlists = await selectListsByUserId(user.user.id);
-      set((state) => ({
-        playlists: playlists ?? state.playlists,
-      }));
-    }
-  },
-  refreshUser: async () => {
-    const userId = get().user?.user?.id;
-    if (userId) {
-      const res = await getUserById(userId);
-      localStorage.setItem("stored", JSON.stringify(res))
-      set({ stored: res });
-    }
-  },
-  signIn: async (email, password) => {
-    const res = await signInWithEmailAndPassword(email, password).then(
-      (user) => {
-        localStorage.setItem("user", JSON.stringify(user))
+      initializeUser().then((result) => {
+        if (!result.ok) {
+          return data.subscription.unsubscribe
+        }
+  
         set({
-          user: user,
-        });
-        get().refreshPlaylists();
-        get().refreshUser();
-        return user;
+          userdata: result.data
+        })
+  
+        get().refreshFavorites()
+        get().refreshUserLists()
+      })
+
+      return data.subscription.unsubscribe
+  },
+  refreshUserLists: async() => {
+      const userId = get().userdata?.user.id
+      if (!userId) {
+        return 
       }
-    );
-    return res != null;
+
+      const result = await selectListsByUserId(userId)
+      if (!result.ok) {
+        return
+      }
+
+      set({
+        lists: result.data
+      })
+  },
+  refreshFavorites: async () => {
+    const id = get().userdata?.user?.id
+    if (!id) {
+      return
+    }
+    const { data, error } = await supabase.from("favoritemovies").select("*").eq("user_id", id)
+    if (error) {
+      return
+    }
+    set({
+      favorites: data.map((d) => {
+        return { 
+          id: d.movie_id !== -1 ? d.movie_id : d.show_id,
+          isMovie: (d.movie_id !== -1),
+          favorite: true,
+          description: (d.overview ?? ""), 
+          name: (d.title ?? ""),
+          posterUrl: d.poster_path ?? undefined
+        }
+      })
+    })
+  },
+  refreshUser: async() => {
+    const {data, error} = await supabase.auth.getUser()
+    if (error) {
+      return
+    }
+    const id = data.user?.id
+    if (!id) {
+      return
+    }
+    const stored = await getUserById(id)
+    if (!stored.ok) {
+      return 
+    }
+
+    set({
+        userdata: {
+          user: data.user,
+          stored: stored.data
+        }
+    })
   },
   signOut: async () => {
-    supabaseSignOut().then((res) => {
-      if (res) {
-        localStorage.setItem("user", "")
-        localStorage.setItem("stored", "")
-        set({
-          user: null,
-          stored: null,
-          playlists: []
-        })
-      }
-    })
+    supabase.auth.signOut({})
+  },
+  signIn: async (email, password) => { 
+    const result = await signInWithEmailAndPassword(email, password)
+    return result.ok 
+  },
+  toggleItemFavorite: async (item) => {
+    if (item.favorite) {
+      supabase.from("favoritemovies").delete().eq(item.isMovie ? "movie_id" : "show_id", item.id)
+    } else {
+      supabase.from("favoritemovies").insert(
+        {
+          movie_id: item.isMovie ? item.id : -1,
+          show_id: item.isMovie ? -1 : item.id,
+          title: item.name,
+          overview: item.description,
+          poster_path: item.posterUrl
+        }
+      )
+    }
   }
-}));
+}))
+
+
+
+async function initializeUser(): Promise<Result<UserData, any>> {
+ 
+  const user = await supabase.auth.getUser()
+
+  if (user.error) {
+    return failureResult(user.error)
+  }
+
+  const stored = await getUserById(user.data.user.id)
+
+  if (!stored.ok) {
+    return failureResult(stored.error)
+  }
+
+  return successResult(
+    {
+      user: user.data.user,
+      stored: stored.data
+    }
+  )
+}

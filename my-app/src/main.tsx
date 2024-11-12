@@ -12,16 +12,13 @@ import { SignInPage, SignUpPage } from "./Pages/SignIn";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import SearchPage from "./Pages/Search";
 import BrowsePage from "./Pages/Browse";
-import MovieInfo from "./components/MovieInfo";
-import ShowInfo from "./components/ShowInfo";
+import MovieInfo, { ShowInfo } from "./Pages/Movie-Show-Infor";
 import Recommendations from "./Pages/Recommendations";
-import CommentsPage from "./components/CommentsPage";
+import CommentsPage from "./Pages/CommentsPage";
 import FavoritesPreview from "./components/FavoritesPreview";
-import YourListPreview from "./components/YourListPreview";
-import OtherListPreview from "./components/OtherListPreview";
+import ListViewPage from "./Pages/ListViewPage";
 import ProtectedRoute from "./components/ProtectedRoute";
-import YourProfileScreen from "./components/YourProfileScreen";
-import OtherProfileScreen from "./components/OtherProfileScreen";
+import ProfilePage from "./Pages/ProfilePage";
 
 const router = createBrowserRouter([
   {
@@ -34,8 +31,8 @@ const router = createBrowserRouter([
         path: "search",
         children: [
           { index: true, element: <Navigate to="/search/movie"/> },
-          { path: "movie", element: <SearchPage /> },
-          { path: "show", element: <SearchPage /> }
+          { path: "movie", element: <SearchPage searchState={"movie"} /> },
+          { path: "show", element: <SearchPage searchState={"tv"} /> }
         ],
       },
       {
@@ -47,38 +44,45 @@ const router = createBrowserRouter([
         ],
       },
       {
-        path: 'browse', element: <BrowsePage/>
+        path: 'browse',  
+        children: [
+          { index: true, element: <Navigate to="/browse/movie"/> },
+          { path: "movie", element: <BrowsePage searchState="movie"/> },
+          { path: "show", element: <BrowsePage searchState="tv"/> }
+        ],
       },
       {
         path: 'recommended', element: <ProtectedRoute><Recommendations/></ProtectedRoute>
       },
       {
-        path: "movieinfo", element: <MovieInfo/>
+        path: "movie/:id", 
+        element: <MovieInfo/>, 
+        children: [
+          {
+            path:"comments", element: <CommentsPage/>
+          }
+        ]
       },
       {
-        path: "showinfo", element: <ShowInfo/>
+        path: "show/:id", element: <ShowInfo/>, 
+        children: [
+          {
+            path:"comments", element: <CommentsPage/>
+          }
+        ]
       },
       {
-        path:"home/ulist/:listId", element: <YourListPreview/>
+        path:"list/:listId", element: <ListViewPage/>
       },
       {
-        path:"home/list/:listId", element: <OtherListPreview/>
+        path:"profile", element: <ProtectedRoute><ProfilePage/></ProtectedRoute>
       },
       {
-        path:"home/ulist/favorites", element: <FavoritesPreview/>
+        path:"profile/:username/favorites", element: <FavoritesPreview/>
       },
       {
-        path:"movieinfo/:movieId/comments", element: <CommentsPage/>
+        path:"profile/:username", element: <ProfilePage/>
       },
-      {
-        path:"showinfo/:showId/comments", element: <CommentsPage/>
-      },
-      {
-        path:"profile", element: <ProtectedRoute><YourProfileScreen/></ProtectedRoute>
-      },
-      {
-        path:"profile/:username", element: <OtherProfileScreen/>
-      }
     ],
   },
 ]);

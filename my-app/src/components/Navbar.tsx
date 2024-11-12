@@ -7,9 +7,9 @@ import { useShallow } from 'zustand/shallow';
 
 const Navbar = () => {
     const signOut = useUserStore((state) => state.signOut);
+    
     const navigate = useNavigate();
-    const user = useUserStore(useShallow((state) => state.stored));
-    console.log("USERRRR", user?.user_id);
+    const user = useUserStore(useShallow((state) => state.userdata?.stored));
 
     return (
         <nav className="sticky top-0 z-50 bg-white shadow-sm"> {/* Add sticky classes here */}

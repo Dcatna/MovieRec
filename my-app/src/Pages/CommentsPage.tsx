@@ -1,24 +1,53 @@
-import { MovieListResult } from "@/types/MovieListResponse";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getComments, insertComment, insertReply } from "@/Data/supabase-client";
-import CommentBox, { CommentType } from "./CommentBox";
+import CommentBox, { CommentType } from "../components/CommentBox";
 import { useState } from "react";
-import { useUserStore } from "@/Data/userstore";
+import { ContentItem, useUserStore } from "@/Data/userstore";
 import { useShallow } from "zustand/shallow";
+import { useStateProducer } from "./ListViewPage";
+import { movieListResultToContentItem, tmdbClient } from "@/Data/TMDB-fetch";
 
 const CommentsPage = () => {
+
     const location = useLocation();
-    const movie: MovieListResult = location.state;
+    const params = useParams();
+
+    const id = Number(params['id'])
+    const isMovie = location.pathname.includes("movie")
+    const favorites = useUserStore(useShallow(state => state.favorites))
+    
+    const movieId = isMovie ? id : -1
+    const showId = isMovie ? -1 : id
+
+    const item = useStateProducer<ContentItem | undefined>(undefined,async (update) => {
+        if (isMovie) {
+            tmdbClient.fetchMovieByID(movieId).then((r) => {
+                const item = movieListResultToContentItem(r)
+                update(
+                    {
+                        ...item,
+                        favorite: favorites.includes({...item, favorite: true})
+                    }
+
+                )
+            })
+        } else {
+            tmdbClient.fetchShowByID(showId)
+        }
+    }, [])
+
+    const queryClient = useQueryClient()
+
     const [currComment, setCurrComment] = useState<string>("");
     const [activeReply, setActiveReply] = useState<number | null>(null);
-    const user = useUserStore(useShallow((state) => state.stored));
-    const queryClient = useQueryClient();
+    const user = useUserStore(useShallow((state) => state.userdata?.stored));
+
     const navigate = useNavigate(); // Initialize navigate hook
 
     const { data: comments, isLoading, error } = useQuery<CommentType[], Error>(
-        ["comments", movie.id], 
-        () => getComments(movie.id, -1),
+        ["comments", id, isMovie], 
+        () => getComments(movieId, showId),
         {
             staleTime: 1000 * 60 * 5, // Cache for 5 minutes
             cacheTime: 1000 * 60 * 10, // Keep data in cache for 10 minutes
@@ -39,16 +68,16 @@ const CommentsPage = () => {
         try {
             if (!activeReply) {
                 // Insert new comment
-                await insertComment(movie.id, -1, user.user_id, date, currComment);
+                await insertComment(movieId, showId, user?.user_id!!, date, currComment);
             } else {
                 // Insert reply to a specific comment
-                await insertReply(date, user.user_id, currComment, activeReply);
+                await insertReply(date, user?.user_id!!, currComment, activeReply);
                 setActiveReply(null);
             }
 
             // Clear the input and refresh comments
             setCurrComment("");
-            queryClient.invalidateQueries(["comments", movie.id]);
+            queryClient.invalidateQueries(["comments", id, isMovie]);
 
         } catch (error) {
             console.error("Failed to add comment or reply:", error);
@@ -65,7 +94,7 @@ const CommentsPage = () => {
                             onClick={() => navigate(-1)}
                             className="text-blue-600 font-bold"
                         >
-                            ← Back to {movie.title}
+                            ← Back to {item?.name}
                         </button>
                     
                     </div>
@@ -78,7 +107,7 @@ const CommentsPage = () => {
                                 singleComment={false}
                                 onReplyClick={() => handleReply(comment.id)}
                                 replyActive={false}
-                                refreshReplies={activeReply === comment.id ? () => getComments(movie.id, -1) : undefined}
+                                refreshReplies={activeReply === comment.id ? () => getComments(movieId, showId) : undefined}
                             />
                         </div>
                     ))

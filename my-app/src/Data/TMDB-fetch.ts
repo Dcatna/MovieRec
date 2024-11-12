@@ -1,10 +1,39 @@
 import { TokenBucket } from "@/ratelimit/TokenBucket";
 import { TokenBuckets } from "@/ratelimit/TokenBuckets";
-import { MovieListResponse, MovieListResult, MovieTrailer, ResourceType, ShowListResponse, SortType } from "@/types/MovieListResponse";
+import { MovieListResponse, MovieListResult, MovieTrailer, ResourceType, ShowListResponse, ShowListResult, SortType } from "@/types/MovieListResponse";
 import { buildUrl } from "./query";
 import { Credit, ShowDetailResponse, SimilarMovieResult } from "@/types/types";
+import { ContentItem } from "./userstore";
 
-class TMDBCClient {
+
+export const showListResultToContentItem = (result: ShowListResult): ContentItem => {
+    const partial_url = "https://image.tmdb.org/t/p/original/"
+    return {
+      id: result.id,
+      isMovie: true,
+      name: result.original_name,
+      description: result.overview,
+      posterUrl: partial_url+result.backdrop_path,
+      favorite: false
+    }
+  }
+  
+  export const movieListResultToContentItem = (result: MovieListResult): ContentItem => {
+      const partial_url = "https://image.tmdb.org/t/p/original/"
+      return {
+        id: result.id,
+        isMovie: true,
+        name: result.title,
+        description: result.overview,
+        posterUrl: partial_url+result.backdrop_path,
+        favorite: false
+      }
+  }
+  
+export const movieResposneToContentItems = (res: MovieListResponse) => res.results.map(movieListResultToContentItem)
+export const showResponseToContentItems = (res: ShowListResponse) => res.results.map(showListResultToContentItem)
+
+class TMDBClient {
 
     private reqPerMin = 50
 
@@ -409,4 +438,4 @@ class TMDBCClient {
     }
 }
 
-export default TMDBCClient
+export const tmdbClient = new TMDBClient();

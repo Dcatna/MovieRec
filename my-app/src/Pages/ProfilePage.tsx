@@ -1,26 +1,28 @@
 import { useUserStore } from "@/Data/userstore";
 import { useShallow } from "zustand/shallow";
-import default_image from "./user_default.jpg";
 import { useEffect, useState } from "react";
-import { deleteListById, ListWithPostersRpcResponse, publicToggleByListId, selectListsByIdsWithPoster, supabase, updateUserProfileImage } from "@/Data/supabase-client";
+import { deleteListById, ListWithPostersRpcResponse, publicToggleByListId, selectListsByIdsWithPoster, supabase } from "@/Data/supabase-client";
 import { FaTrashAlt, FaEye, FaEyeSlash, FaPen } from 'react-icons/fa'; // Importing pen icon
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
+import { getOrDefault } from "@/lib/utils";
 
-const YourProfileScreen = () => {
-  const user = useUserStore(useShallow((state) => state.stored));
+const ProfilePage = () => {
+  const user = useUserStore(useShallow((state) => state.userdata?.stored));
   const [userLists, setUserLists] = useState<ListWithPostersRpcResponse[]>([]);
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [_, setSelectedImage] = useState<File | null>(null);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUserLists = async () => {
-      const res = await selectListsByIdsWithPoster(user.user_id);
-      setUserLists(res);
+      if (user) {
+        const res = await selectListsByIdsWithPoster(user.user_id);
+        setUserLists(getOrDefault(res, []));
+      }
     };
     fetchUserLists();
-  }, [user.user_id]);
+  }, [user]);
 
   async function handleDelete(list_id) {
     const res = await deleteListById(list_id);
@@ -46,7 +48,7 @@ const YourProfileScreen = () => {
       const { data: imageData, error: uploadError } = await supabase
         .storage
         .from("profile_images")
-        .upload(`public/${user.user_id}/${file.name}`, file);
+        .upload(`public/${user?.user_id}/${file.name}`, file);
 
       if (uploadError) {
         console.error("Upload error:", uploadError);
@@ -57,10 +59,11 @@ const YourProfileScreen = () => {
       const imageUrl = supabase.storage.from("profile_images").getPublicUrl(imageData.path).data.publicUrl;
 
       // Update the user's profile with the new image URL
-      await updateUserProfileImage(user.user_id, imageUrl);
+      // TODO: implement
+     //  await updateUserProfileImage(user.user_id, imageUrl);
 
       // Refetch user profile data to show the updated image
-      queryClient.invalidateQueries(['user_profile', user.user_id]);
+      queryClient.invalidateQueries(['user_profile', user?.user_id]);
     } catch (error) {
       console.error("Error uploading profile image:", error);
     }
@@ -81,7 +84,7 @@ const YourProfileScreen = () => {
           <div className="relative">
             <img
               className="rounded-full h-24 w-24 border-2 border-gray-300"
-              src={user.profile_image || default_image}
+              src={user?.profile_image ?? ""}
               alt="Profile Picture"
             />
             {/* Pencil icon overlay */}
@@ -95,7 +98,7 @@ const YourProfileScreen = () => {
               />
             </label>
           </div>
-          <h2 className="mt-4 text-xl font-semibold text-black">{user.username || "User"}</h2>
+          <h2 className="mt-4 text-xl font-semibold text-black">{user?.username ?? "User"}</h2>
         </div>
       </div>
 
@@ -143,4 +146,4 @@ const YourProfileScreen = () => {
   );
 };
 
-export default YourProfileScreen;
+export default ProfilePage;
