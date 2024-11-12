@@ -1,4 +1,5 @@
 import {
+  deleteListById,
   selectListByIdWithItems,
 } from "@/Data/supabase-client";
 import { ImageGrid } from "../components/poster-item";
@@ -6,7 +7,7 @@ import { ListWithItems, useUserStore, ContentItem } from "@/Data/userstore";
 import { useShallow } from "zustand/shallow";
 import ContentListItem from "../components/ContentListItem";
 import { useEffect, useMemo, useState } from "react";
-import { useLoaderData, useParams } from "react-router-dom";
+import { useLoaderData, useNavigate, useParams } from "react-router-dom";
 
 export function useStateProducer<T extends any>(
   defaultValue: T,
@@ -25,8 +26,10 @@ export function useStateProducer<T extends any>(
 const ListViewPage = () => {
   
   const params = useParams();
+  const navigate = useNavigate();
   const data = useLoaderData();
   const user = useUserStore(useShallow((state) => state.userdata?.stored));
+  const deleteList = useUserStore(useShallow((state) => state.deleteList));
   const favorites = useUserStore(useShallow((state) => state.favorites));
 
   const listId = params["listId"];
@@ -79,7 +82,7 @@ const ListViewPage = () => {
             description={list.description}
             createdBy={list.user_id}
             images={previewImages}
-            onDelete={() => {}}
+            onDelete={() => deleteList(list.list_id).then(() => navigate('/home'))}
         ></ListHeader>
 
       <div className="grid lg:grid-cols-4 sm:grid-cols-2 gap-6 w-full">
