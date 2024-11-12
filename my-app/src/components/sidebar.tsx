@@ -1,26 +1,15 @@
-import React, { useRef, useState } from "react";
+import React, { useRef } from "react";
 import { useUserStore } from "../Data/userstore";
 import { cn } from "../lib/utils";
 import { ImageGrid } from "./poster-item";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faGripLinesVertical, faL } from "@fortawesome/free-solid-svg-icons";
+import { faGripLinesVertical } from "@fortawesome/free-solid-svg-icons";
 import defualtlist from "./movieicon.png";
 import { Link } from "react-router-dom";
 import defualtFav from "./default_favorite_list.jpg";
 import { useShallow } from "zustand/shallow";
 import { UserProfileImage } from "./user-profile-image";
 import { Button } from "./ui/button";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "./ui/alert-dialog";
 import { Input } from "./ui/input";
 import {
   Dialog,
@@ -36,6 +25,7 @@ import { contentFrom } from "@/Data/supabase-client";
 export interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function Sidebar({ className }: SidebarProps) {
+
   const user = useUserStore(useShallow((state) => state.userdata?.stored));
   const lists = useUserStore(useShallow((state) => state.lists));
   const signOut = useUserStore((state) => state.signOut);
@@ -69,8 +59,14 @@ export function Sidebar({ className }: SidebarProps) {
         </div>
         <div className="grid grid-cols-1 gap-4">
           {user !== null ? (
-            <Link to={`/profile/${user?.user_id}/favorites`} state={{ undefined }}>
-              <div className="flex items-center space-x-4 rounded-lg bg-white shadow-md p-4">
+            <Link
+              to={`/profile/${user?.user_id}/favorites`}
+              state={{ undefined }}
+            >
+              <div
+                key="favorite_pinned"
+                className="flex items-center space-x-4 rounded-lg bg-white shadow-md p-4"
+              >
                 <div className="w-20 h-20 flex-shrink-0">
                   <img
                     src={defualtFav}
@@ -86,15 +82,16 @@ export function Sidebar({ className }: SidebarProps) {
                 </div>
               </div>
             </Link>
-          ) : (
-            <div />
-          )}
+          ) : undefined}
 
           {lists.map((item) => {
-            const images = contentFrom(item)?.map(it => it.url) ?? []
+            const images = contentFrom(item)?.map((it) => it.url) ?? [];
             return (
               <Link to={`/list/${item.list_id}`} state={{ item }}>
-                <div className="flex items-center space-x-4 rounded-lg bg-white shadow-md p-4">
+                <div
+                  key={item.list_id}
+                  className="flex items-center space-x-4 rounded-lg bg-white shadow-md p-4"
+                >
                   <div className="w-20 h-20 flex-shrink-0">
                     {images.length > 3 ? (
                       <ImageGrid images={images} />
@@ -127,7 +124,6 @@ function CreateListDialog({
 }: {
   onConfirm: (name: string, description: string, pub: boolean) => void;
 }) {
-
   const nameRef = useRef<HTMLInputElement>(null);
   const descriptionRef = useRef<HTMLInputElement>(null);
 
@@ -171,7 +167,15 @@ function CreateListDialog({
             <Button>Cancel </Button>
           </DialogTrigger>
           <DialogTrigger asChild>
-            <Button onClick={() => onConfirm(nameRef.current?.value ?? "", descriptionRef.current?.value ?? "", false)}>
+            <Button
+              onClick={() =>
+                onConfirm(
+                  nameRef.current?.value ?? "",
+                  descriptionRef.current?.value ?? "",
+                  false
+                )
+              }
+            >
               Create
             </Button>
           </DialogTrigger>

@@ -1,4 +1,4 @@
-import { tmdbClient } from "@/Data/TMDB-fetch";
+import { movieListResultToContentItem, showListResultToContentItem, tmdbClient } from "@/Data/TMDB-fetch";
 import { faPlay } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
@@ -7,11 +7,13 @@ import { useShallow } from "zustand/shallow";
 import { useQuery } from "@tanstack/react-query";
 import { useUserStore } from "@/Data/userstore";
 import { Link, Outlet, useParams } from "react-router-dom";
+import { addToListByID, supabase } from "@/Data/supabase-client";
 
 const partial_url = "https://image.tmdb.org/t/p/original/";
 
 export const ShowInfo = () => {
-    const userLists = useUserStore(useShallow((state) => state.lists));
+  const userLists = useUserStore(useShallow((state) => state.lists));
+  const refreshUserLists = useUserStore((state) => state.refreshUserLists);
   const params = useParams();
 
   const showId = params["id"]!!;
@@ -31,6 +33,17 @@ export const ShowInfo = () => {
   });
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+
+  const handleListAdd = (listId: string) => {
+    if  (show) {
+      addToListByID(listId, showListResultToContentItem(show)).then((r) => {
+        if(r.ok) {
+          refreshUserLists()
+        }
+      })
+    }
+  }
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
@@ -66,7 +79,7 @@ export const ShowInfo = () => {
               {userLists?.map((list) => (
                 <li
                   key={list.list_id}
-                  onClick={() => {}}
+                  onClick={() => handleListAdd(list.list_id)}
                   className="cursor-pointer hover:bg-gray-200 py-2 px-4 block whitespace-no-wrap transition-colors duration-200"
                 >
                   {list.name}
@@ -137,6 +150,7 @@ export const ShowInfo = () => {
 
 const MovieInfo = () => {
   const userLists = useUserStore(useShallow((state) => state.lists));
+  const refreshUserLists = useUserStore((state) => state.refreshUserLists);
   const params = useParams();
 
   const movieId = params["id"]!!;
@@ -156,6 +170,17 @@ const MovieInfo = () => {
   });
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+
+  const handleListAdd = (listId: string) => {
+    if  (movie) {
+      addToListByID(listId, movieListResultToContentItem(movie)).then((r) => {
+        if(r.ok) {
+          refreshUserLists()
+        }
+      })
+    }
+  }
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
@@ -191,7 +216,7 @@ const MovieInfo = () => {
               {userLists?.map((list) => (
                 <li
                   key={list.list_id}
-                  onClick={() => {}}
+                  onClick={() => handleListAdd(list.list_id)}
                   className="cursor-pointer hover:bg-gray-200 py-2 px-4 block whitespace-no-wrap transition-colors duration-200"
                 >
                   {list.name}

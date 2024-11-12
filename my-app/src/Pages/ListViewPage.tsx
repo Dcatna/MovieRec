@@ -4,7 +4,7 @@ import {
 import { ImageGrid } from "../components/poster-item";
 import { ListWithItems, useUserStore, ContentItem } from "@/Data/userstore";
 import { useShallow } from "zustand/shallow";
-import ContentListItem from "../components/Moviebox";
+import ContentListItem from "../components/ContentListItem";
 import { useEffect, useMemo, useState } from "react";
 import { useLoaderData, useParams } from "react-router-dom";
 
@@ -86,6 +86,7 @@ const ListViewPage = () => {
         {items.map((item) => {
           return (
             <ContentListItem
+              key={"list_"+item.id}
               favorite={item.favorite}
               contentId={item.id}
               description={item.description}

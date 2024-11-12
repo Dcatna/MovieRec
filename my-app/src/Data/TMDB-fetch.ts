@@ -6,7 +6,7 @@ import { Credit, ShowDetailResponse, SimilarMovieResult } from "@/types/types";
 import { ContentItem } from "./userstore";
 
 
-export const showListResultToContentItem = (result: ShowListResult): ContentItem => {
+export const showListResultToContentItem = (result: ShowListResult | ShowDetailResponse): ContentItem => {
     const partial_url = "https://image.tmdb.org/t/p/original/"
     return {
       id: result.id,

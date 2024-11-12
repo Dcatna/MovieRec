@@ -20,6 +20,7 @@ const ContentListItem = (props: ContentItemProps) => {
   const toggleItemFavorite = useUserStore(state => state.toggleItemFavorite)
 
   const toggleFavorite = () => {
+    console.log("toggled favorite")
     toggleItemFavorite(
       {
         id: props.contentId,

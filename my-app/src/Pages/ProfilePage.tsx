@@ -1,46 +1,17 @@
 import { useUserStore } from "@/Data/userstore";
 import { useShallow } from "zustand/shallow";
-import { useEffect, useState } from "react";
-import { deleteListById, ListWithPostersRpcResponse, publicToggleByListId, selectListsByIdsWithPoster, supabase } from "@/Data/supabase-client";
+import {  useState } from "react";
+import {  ListWithPostersRpcResponse, supabase } from "@/Data/supabase-client";
 import { FaTrashAlt, FaEye, FaEyeSlash, FaPen } from 'react-icons/fa'; // Importing pen icon
-import { useQueryClient } from "@tanstack/react-query";
-import { Link, useNavigate } from "react-router-dom";
-import { getOrDefault } from "@/lib/utils";
 
 const ProfilePage = () => {
   const user = useUserStore(useShallow((state) => state.userdata?.stored));
-  const [userLists, setUserLists] = useState<ListWithPostersRpcResponse[]>([]);
+  const userLists = useUserStore(useShallow(state => state.lists))
+  const deleteListById = useUserStore((state => state.deleteList));
   const [_, setSelectedImage] = useState<File | null>(null);
-  const queryClient = useQueryClient();
-  const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchUserLists = async () => {
-      if (user) {
-        const res = await selectListsByIdsWithPoster(user.user_id);
-        setUserLists(getOrDefault(res, []));
-      }
-    };
-    fetchUserLists();
-  }, [user]);
-
-  async function handleDelete(list_id) {
-    const res = await deleteListById(list_id);
-    if (res === 0) {
-      queryClient.invalidateQueries(['user_lists', user?.user_id]);
-      setUserLists((prevLists) => prevLists.filter((list) => list.list_id !== list_id));
-      navigate("/profile");
-    }
-  }
-
-  async function handleVisibilityToggle(list_id) {
-    await publicToggleByListId(list_id);
-    setUserLists((prevLists) =>
-      prevLists.map((list) =>
-        list.list_id === list_id ? { ...list, public: !list.public } : list
-      )
-    );
-    queryClient.invalidateQueries(['user_lists', user?.user_id]);
+  async function handleDelete(list_id: string) {
+    deleteListById(list_id);
   }
 
   async function handleProfileImageUpload(file: File) {
@@ -54,16 +25,7 @@ const ProfilePage = () => {
         console.error("Upload error:", uploadError);
         return;
       }
-
-      // Get the public URL for the uploaded image
       const imageUrl = supabase.storage.from("profile_images").getPublicUrl(imageData.path).data.publicUrl;
-
-      // Update the user's profile with the new image URL
-      // TODO: implement
-     //  await updateUserProfileImage(user.user_id, imageUrl);
-
-      // Refetch user profile data to show the updated image
-      queryClient.invalidateQueries(['user_profile', user?.user_id]);
     } catch (error) {
       console.error("Error uploading profile image:", error);
     }
@@ -111,7 +73,6 @@ const ProfilePage = () => {
         <div className="space-y-4">
           {userLists.length > 0 ? (
             userLists.map((list: ListWithPostersRpcResponse) => (
-              <Link to={`/home/ulist/${list.list_id}`} state={{ item: list }} key={list.list_id}>
                 <div key={list.list_id} className="bg-gray-50 rounded-md p-4 shadow-md flex items-center justify-between">
                   <div>
                     <h3 className="text-lg font-medium text-gray-800">{list.name}</h3>
@@ -127,7 +88,7 @@ const ProfilePage = () => {
                       <FaTrashAlt size={16} />
                     </button>
                     <button
-                      onClick={() => handleVisibilityToggle(list.list_id)}
+                      onClick={() => {}}
                       className="text-gray-500 hover:text-gray-700"
                       aria-label="Toggle visibility"
                     >
@@ -135,7 +96,6 @@ const ProfilePage = () => {
                     </button>
                   </div>
                 </div>
-              </Link>
             ))
           ) : (
             <p className="text-center text-gray-500">You have no lists yet.</p>

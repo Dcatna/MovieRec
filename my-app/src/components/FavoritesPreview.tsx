@@ -3,7 +3,7 @@ import { useUserStore } from '@/Data/userstore';
 import { useShallow } from 'zustand/shallow';
 import default_favs from './default_favorite_list.jpg';
 import { useEffect } from 'react';
-import ContentListItem from './Moviebox';
+import ContentListItem from './ContentListItem';
 
 const FavortiesPage = () => {
 

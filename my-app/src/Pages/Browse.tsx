@@ -5,7 +5,7 @@ import {  useUserStore, type ContentItem } from "@/Data/userstore";
 import { useState, useMemo } from "react";
 import genreData from "../Data/genres.json";
 import { Badge } from "@/components/ui/Badge";
-import ContentListItem from "@/components/Moviebox";
+import ContentListItem from "@/components/ContentListItem";
 import { useShallow } from "zustand/shallow";
 import { useNavigate } from "react-router-dom";
 import { useInfiniteScroller } from '@/lib/utils';

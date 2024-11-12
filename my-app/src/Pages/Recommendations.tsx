@@ -1,4 +1,4 @@
-import ContentListItem from "@/components/Moviebox";
+import ContentListItem from "@/components/ContentListItem";
 import {
     getRecentMovieFavorites,
     getRecentShowFavorites,

@@ -1,7 +1,7 @@
-import { createClient, User } from "@supabase/supabase-js";
+import { createClient, PostgrestError, User } from "@supabase/supabase-js";
 import { Database } from "./supabase";
-import { ListItem, ListWithItems } from "./userstore";
-import { ContentItemProps } from "@/components/Moviebox";
+import { ContentItem, ListItem, ListWithItems } from "./userstore";
+import { ContentItemProps } from "@/components/ContentListItem";
 import { favs } from "@/types/types";
 import { ShowListResult } from "@/types/MovieListResponse";
 import { CommentType } from "@/components/CommentBox";
@@ -237,48 +237,22 @@ export async function selectListByID(
 }
 
 export async function addToListByID(
-  listID: string,
-  movie: ContentItemProps | undefined,
-  show: ShowListResult | undefined,
-  client: StoredUser | null
-) {
-  const partial_url = "https://image.tmdb.org/t/p/original/";
+  listId: string,
+  item: ContentItem
+): Promise<Result<undefined, PostgrestError>> {
+    const { error } = await supabase.from("listitem").insert({
+      list_id: listId,
+      movie_id: item.isMovie ? item.id : -1,
+      show_id: item.isMovie ? -1 : item.id,
+      poster_path: item.posterUrl,
+      title: item.name,
+      description: item.description,
+    });
 
-  // //console.log(partial_url +movie?.item.poster_path.slice(1, movie.item.poster_path.length), "POSTER")
-  // if (show === undefined) {
-  //   const { data, error } = await supabase.from("listitem").insert({
-  //     list_id: listID,
-  //     movie_id: movie!!.item.id,
-  //     show_id: -1,
-  //     user_id: client?.user_id,
-  //     poster_path:
-  //       partial_url +
-  //       movie?.item.poster_path.slice(1, movie.item.poster_path.length),
-  //     title: movie?.item.title,
-  //     description: movie?.item.overview,
-  //   });
-  //   if (error) {
-  //     console.log(error);
-  //   } else {
-  //     return data;
-  //   }
-  // } else {
-  //   const { data, error } = await supabase.from("listitem").insert({
-  //     list_id: listID,
-  //     movie_id: -1,
-  //     show_id: show!!.id,
-  //     user_id: client?.user_id,
-  //     poster_path:
-  //       partial_url + show.poster_path.slice(1, show.poster_path.length),
-  //     title: show.name,
-  //     description: show.overview,
-  //   });
-  //   if (error) {
-  //     console.log(error);
-  //   } else {
-  //     return data;
-  //   }
-  // }
+    if (error) {
+      return failureResult(error)
+    } 
+    return successResult(undefined)
 }
 
 export async function getFavoritedMoviesByUser(): Promise<favs[] | null> {
@@ -453,15 +427,16 @@ export async function insertLikeByUser(comment_id: number, user_id: string) {
   }
 }
 
-export async function deleteListById(list_id: string) {
-  const { error } = await supabase
+export async function deleteListById(list_id: string): Promise<Result<undefined, PostgrestError>> {
+  const {  error } = await supabase
     .from("userlist")
     .delete()
     .match({ list_id: list_id });
+
   if (error) {
-    throw error;
+    return failureResult(error)
   } else {
-    return 0;
+    return successResult(undefined)
   }
 }
 

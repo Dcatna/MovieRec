@@ -13,7 +13,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useInfiniteScroller } from "@/lib/utils";
 import { ContentItem, useUserStore } from "@/Data/userstore";
 import { useShallow } from "zustand/shallow";
-import ContentListItem from "@/components/Moviebox";
+import ContentListItem from "@/components/ContentListItem";
 
 const SearchPage = ({ searchState }: { searchState: ResourceType }) => {
 
