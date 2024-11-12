@@ -10,7 +10,7 @@ import { FastAverageColor } from "fast-average-color";
 export function UserProfileImage({
   className,
 }: React.HTMLAttributes<HTMLDivElement>) {
-  const user = useUserStore(useShallow((state) => state.stored));
+  const user = useUserStore(useShallow((state) => state.userdata?.stored));
   const [dominantRgb, setDominantRgb] = useState("rgba(0, 0, 0, 0)");
 
   const imgSrc = useMemo(() => {

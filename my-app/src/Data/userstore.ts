@@ -57,6 +57,7 @@ export interface UserStore {
   signOut: () => Promise<void>
   init: () => () => void 
   toggleItemFavorite: (item: ContentItem) => Promise<void>
+  createList: (name: string, description: string, pub: boolean) => Promise<void>
 }
 
 
@@ -187,6 +188,22 @@ export const useUserStore = create<UserStore>((set, get) => ({
         }
       )
     }
+  },
+  createList: async (name: string, description: string, pub: boolean) => {
+      const user = get().userdata?.user
+      if (!user) {
+        return
+      }
+      const {error} = await supabase.from("userlist").insert({
+          name: name,
+          public: pub,
+          description: description,
+          user_id: user.id
+      })
+      if (error) {
+          return 
+      }
+      get().refreshUserLists()
   }
 }))
 

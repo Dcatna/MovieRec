@@ -5,7 +5,7 @@ import default_favs from './default_favorite_list.jpg';
 import { useEffect } from 'react';
 import ContentListItem from './Moviebox';
 
-const FavoritesPreview = () => {
+const FavortiesPage = () => {
 
     const favorites = useUserStore(useShallow((state) => state.favorites));
     const user = useUserStore(useShallow((state) => state.userdata?.stored));
@@ -18,8 +18,6 @@ const FavoritesPreview = () => {
     if (favorites === undefined) {
         return <div>Loading...</div>;
     }
-
-    console.log(favorites, "Favorites")
 
     return (
         <div className="flex flex-col items-start p-8 bg-white shadow-md rounded-lg mx-auto">
@@ -57,4 +55,4 @@ const FavoritesPreview = () => {
     );
 };
 
-export default FavoritesPreview;
+export default FavortiesPage;

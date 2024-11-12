@@ -6,7 +6,7 @@ import { ListWithItems, useUserStore, ContentItem } from "@/Data/userstore";
 import { useShallow } from "zustand/shallow";
 import ContentListItem from "../components/Moviebox";
 import { useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useLoaderData, useParams } from "react-router-dom";
 
 export function useStateProducer<T extends any>(
   defaultValue: T,
@@ -25,13 +25,16 @@ export function useStateProducer<T extends any>(
 const ListViewPage = () => {
   
   const params = useParams();
+  const data = useLoaderData();
   const user = useUserStore(useShallow((state) => state.userdata?.stored));
   const favorites = useUserStore(useShallow((state) => state.favorites));
 
   const listId = params["listId"];
 
+
+
   const list = useStateProducer<ListWithItems | undefined>(
-    undefined,
+    (data as ListWithItems | null) ?? undefined,
     async (update) => {
       selectListByIdWithItems(listId!!).then((r) => {
         if (r.ok) {
@@ -39,7 +42,7 @@ const ListViewPage = () => {
         }
       });
     },
-    []
+    [listId]
   );
 
   const items = useMemo<ContentItem[]>(() => {

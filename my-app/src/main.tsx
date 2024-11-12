@@ -5,6 +5,7 @@ import {
   createBrowserRouter,
   Navigate,
   RouterProvider,
+  useParams,
 } from "react-router-dom";
 import { HomePage } from "./Pages/Home";
 import App from "./App";
@@ -19,6 +20,8 @@ import FavoritesPreview from "./components/FavoritesPreview";
 import ListViewPage from "./Pages/ListViewPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ProfilePage from "./Pages/ProfilePage";
+import { selectListByIdWithItems } from "./Data/supabase-client";
+import FavortiesPage from "./components/FavoritesPreview";
 
 const router = createBrowserRouter([
   {
@@ -72,16 +75,23 @@ const router = createBrowserRouter([
         ]
       },
       {
-        path:"list/:listId", element: <ListViewPage/>
+        path:"list/:listId", element: <ListViewPage/>, loader: async (params) => {
+          const data = await selectListByIdWithItems(params['listId'] ?? "")
+          if (data.ok) {
+            return data.data
+          } else {
+            return null
+          }
+        }
       },
       {
         path:"profile", element: <ProtectedRoute><ProfilePage/></ProtectedRoute>
       },
       {
-        path:"profile/:username/favorites", element: <FavoritesPreview/>
+        path:"profile/:userid/favorites", element: <FavortiesPage/>
       },
       {
-        path:"profile/:username", element: <ProfilePage/>
+        path:"profile/:userid", element: <ProfilePage/>
       },
     ],
   },
