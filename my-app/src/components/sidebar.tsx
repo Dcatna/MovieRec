@@ -31,7 +31,10 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+  useSidebar,
 } from "@/components/ui/sidebar";
+import { cn } from "@/lib/utils";
+import { HomeIcon } from "lucide-react";
 const data = [
   {
     title: "Browse",
@@ -71,8 +74,8 @@ const data = [
       },
       {
         title: "Profile",
-        path: "/profile"
-      }
+        path: "/profile",
+      },
     ],
   },
 ];
@@ -81,56 +84,88 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const user = useUserStore(useShallow((state) => state.userdata?.stored));
   const signOut = useUserStore((state) => state.signOut);
   const createList = useUserStore((state) => state.createList);
-  const location = useLocation()
-  const navigate = useNavigate()
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  const lists = useUserStore((state) => state.lists)
+  const lists = useUserStore((state) => state.lists);
+  const {
+    state,
+    open,
+    setOpen,
+    openMobile,
+    setOpenMobile,
+    isMobile,
+    toggleSidebar,
+  } = useSidebar();
+
+  const expanded = state === "expanded";
 
   return (
-    <Sidebar {...props}>
+    <Sidebar {...props} className="max-h-screen overflow-hidden">
       <SidebarHeader>
-        {user ? (
-          <div className="mx-4 my-6 flex flex-col">
-            <UserProfileImage className="w-full h-52" />
-            <div className="flex flex-row justify-between items-center">
-              <text className="text-2xl">{user?.username}</text>
-              <Button onClick={signOut}>Sign out</Button>
-            </div>
-            <CreateListDialog
-              onConfirm={(name, desc, pub) => createList(name, desc, pub)}
-            ></CreateListDialog>
-          </div>
-        ) : (
-          <div>
-           <Link to={"/auth"}>
-            <Button>
-                Create an account
-              </Button>
-           </Link>
-          </div>
-        )}
-      </SidebarHeader>
-      <SidebarContent>
+      {expanded ? (
         <div>
+          {user ? (
+            <div className="flex flex-col">
+              <UserProfileImage
+                className={cn("w-full", expanded ? "h-52 mx-4 my-6" : "")}
+              />
+              <div className="flex flex-row justify-between items-center">
+                <text className="text-2xl">{user?.username}</text>
+                <Button onClick={signOut}>Sign out</Button>
+              </div>
+              <CreateListDialog
+                onConfirm={(name, desc, pub) => createList(name, desc, pub)}
+              ></CreateListDialog>
+            </div>
+          ) : (
+            <div>
+              <Link to={"/auth"}>
+                <Button>Create an account</Button>
+              </Link>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div>
+          {user ? <UserProfileImage className={cn("w-full")} /> : undefined}
+        </div>
+      )}
+   <div className="flex flex-col space-y-4">
           {data.map((item) => {
             return (
-              <SidebarGroup key={item.title}>
-                <SidebarGroupLabel>{item.title}</SidebarGroupLabel>
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    {item.items.map((item) => (
-                      <SidebarMenuItem key={item.title}>
-                        <SidebarMenuButton asChild isActive={item.url === location.pathname}>
-                          <a onClick={() => navigate(item.url ?? "")}>{item.title}</a>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    ))}
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </SidebarGroup>
+              <div>
+                {expanded ? (
+                  <SidebarGroup key={item.title}>
+                    <SidebarGroupLabel>{item.title}</SidebarGroupLabel>
+                    <SidebarGroupContent>
+                      <SidebarMenu>
+                        {item.items.map((item) => (
+                          <SidebarMenuItem key={item.title}>
+                            <SidebarMenuButton
+                              asChild
+                              isActive={item.url === location.pathname}
+                            >
+                              <a onClick={() => navigate(item.url ?? "")}>
+                                {item.title}
+                              </a>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        ))}
+                      </SidebarMenu>
+                    </SidebarGroupContent>
+                  </SidebarGroup>
+                ) : (
+                  <Button size={"icon"}>
+                    <HomeIcon />
+                  </Button>
+                )}
+              </div>
             );
           })}
         </div>
+      </SidebarHeader>
+      <SidebarContent>
         {/* We create a SidebarGroup for each parent. */}
         {lists.map((item) => {
           const images = contentFrom(item)?.map((it) => it.url) ?? [];
