@@ -1,6 +1,6 @@
-import React, { useRef } from "react";
+import React, { ReactNode, useRef } from "react";
 import { useUserStore } from "../Data/userstore";
-import { ImageGrid } from "./poster-item";
+import { ImageGrid, ListPreviewItem } from "./poster-item";
 import defualtlist from "./movieicon.png";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useShallow } from "zustand/shallow";
@@ -16,14 +16,15 @@ import {
 } from "./ui/dialog";
 import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
 import { Label } from "./ui/label";
-import { contentFrom } from "@/Data/supabase-client";
-
+import { contentFrom, supabase } from "@/Data/supabase-client";
+import type { LucideIcon } from "lucide-react";
 export interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
+  SidebarGroupAction,
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
@@ -34,51 +35,60 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
-import { HomeIcon } from "lucide-react";
+import { GlobeIcon, HomeIcon, SearchIcon } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { Skeleton } from "./ui/skeleton";
+import { Card } from "./ui/card";
+import ContentListItem from "./ContentListItem";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "./ui/table";
 const data = [
   {
     title: "Browse",
     url: "/browse",
-    items: [
-      {
-        title: "Movies",
-        url: "/browse/movie",
-      },
-      {
-        title: "Shows",
-        url: "/browse/show",
-      },
-    ],
+    icon: () => <GlobeIcon />,
   },
   {
     title: "Search",
     url: "/search",
-    items: [
-      {
-        title: "Movies",
-        url: "/search/movie",
-      },
-      {
-        title: "Shows",
-        url: "/search/show",
-      },
-    ],
+    icon: () => <SearchIcon />,
   },
   {
     title: "Home",
     url: "/home",
-    items: [
-      {
-        title: "Discover",
-        url: "/home",
-      },
-      {
-        title: "Profile",
-        path: "/profile",
-      },
-    ],
+    icon: () => <HomeIcon />,
   },
 ];
+
+function SidebarItem(props: {
+  name: string;
+  selected: boolean;
+  onClick: () => void;
+  children: ReactNode;
+}) {
+  const { state } = useSidebar();
+  const open = state === "expanded" || state === "extra";
+  return (
+    <div className="space-y-1">
+      <Button
+        variant={props.selected ? "default" : "ghost"}
+        className={cn("w-full", open ? "justify-start" : "justify-center")}
+        size={open ? "lg" : "icon"}
+        onClick={props.onClick}
+      >
+        <div className="stroke-2 fill-none me-4">{props.children}</div>
+        {open ? <text>{props.name}</text> : undefined}
+      </Button>
+    </div>
+  );
+}
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const user = useUserStore(useShallow((state) => state.userdata?.stored));
@@ -87,118 +97,107 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const lists = useUserStore((state) => state.lists);
-  const {
-    state,
-    open,
-    setOpen,
-    openMobile,
-    setOpenMobile,
-    isMobile,
-    toggleSidebar,
-  } = useSidebar();
-
-  const expanded = state === "expanded";
-
+  const { state, setOpen } = useSidebar();
+  const open = state === "expanded" || state === "extra";
   return (
-    <Sidebar {...props} className="max-h-screen overflow-hidden">
+    <Sidebar
+      {...props}
+      collapsible="icon"
+      className="max-h-screen overflow-hidden"
+    >
       <SidebarHeader>
-      {expanded ? (
-        <div>
-          {user ? (
-            <div className="flex flex-col">
-              <UserProfileImage
-                className={cn("w-full", expanded ? "h-52 mx-4 my-6" : "")}
-              />
-              <div className="flex flex-row justify-between items-center">
-                <text className="text-2xl">{user?.username}</text>
-                <Button onClick={signOut}>Sign out</Button>
-              </div>
-              <CreateListDialog
-                onConfirm={(name, desc, pub) => createList(name, desc, pub)}
-              ></CreateListDialog>
-            </div>
-          ) : (
-            <div>
-              <Link to={"/auth"}>
-                <Button>Create an account</Button>
-              </Link>
-            </div>
-          )}
-        </div>
-      ) : (
-        <div>
-          {user ? <UserProfileImage className={cn("w-full")} /> : undefined}
-        </div>
-      )}
-   <div className="flex flex-col space-y-4">
-          {data.map((item) => {
-            return (
-              <div>
-                {expanded ? (
-                  <SidebarGroup key={item.title}>
-                    <SidebarGroupLabel>{item.title}</SidebarGroupLabel>
-                    <SidebarGroupContent>
-                      <SidebarMenu>
-                        {item.items.map((item) => (
-                          <SidebarMenuItem key={item.title}>
-                            <SidebarMenuButton
-                              asChild
-                              isActive={item.url === location.pathname}
-                            >
-                              <a onClick={() => navigate(item.url ?? "")}>
-                                {item.title}
-                              </a>
-                            </SidebarMenuButton>
-                          </SidebarMenuItem>
-                        ))}
-                      </SidebarMenu>
-                    </SidebarGroupContent>
-                  </SidebarGroup>
-                ) : (
-                  <Button size={"icon"}>
-                    <HomeIcon />
-                  </Button>
-                )}
-              </div>
-            );
-          })}
-        </div>
+        <ProfileImage />
+        <Card>
+          <SidebarGroup>
+            <SidebarGroupLabel>Quick access</SidebarGroupLabel>
+            <SidebarGroupContent className="space-y-4">
+              {data.map((item) => {
+                return (
+                  <SidebarItem
+                    name={item.title}
+                    selected={location.pathname.includes(item.url)}
+                    onClick={() => navigate(item.url)}
+                  >
+                    <item.icon></item.icon>
+                  </SidebarItem>
+                );
+              })}
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </Card>
       </SidebarHeader>
       <SidebarContent>
-        {/* We create a SidebarGroup for each parent. */}
-        {lists.map((item) => {
-          const images = contentFrom(item)?.map((it) => it.url) ?? [];
-          return (
-            <Link to={`/list/${item.list_id}`} state={{ item }}>
-              <div
-                key={item.list_id}
-                className="flex items-center space-x-4 rounded-lg bg-white shadow-md p-4"
-              >
-                <div className="w-20 h-20 flex-shrink-0">
-                  {images.length > 3 ? (
-                    <ImageGrid images={images} />
-                  ) : (
-                    <img
-                      src={images[0] ?? defualtlist}
-                      alt="list preview"
-                      className="w-full h-full object-cover rounded-lg"
-                    />
-                  )}
-                </div>
-                <div className="flex flex-col">
-                  <p className="font-bold text-lg">{item.name}</p>
-                  <p className="text-gray-500 text-sm">
-                    Created by: {item.name}
-                  </p>
-                </div>
-              </div>
-            </Link>
-          );
-        })}
+        <ListTable></ListTable>
       </SidebarContent>
       <SidebarRail />
     </Sidebar>
+  );
+}
+
+function ListTable({}) {
+  const lists = useUserStore((state) => state.lists);
+  const { state } = useSidebar();
+
+  // if (state === "collapsed") {
+  //   return (
+  //     <div className="flex flex-col space-y-2 p-4">
+  //       {lists.map((item) => {
+  //         return (
+  //           <div key={item.list_id}  className="w-full max-w-18">
+  //             <ImageGrid images={contentFrom(item).map((it) => it.url)} />
+  //           </div>
+  //         );
+  //       })}
+  //     </div>
+  //   );
+  // }
+
+  const open = state === 'expanded' || state === "extra"
+
+  return (
+    <Table>
+      <TableCaption>Mods available to download.</TableCaption>
+      <TableHeader>
+        <TableRow>
+          {open ? <TableHead>{state === "extra" ? "Title" : ""}</TableHead>:undefined}
+          {open ? <TableHead>Date Added</TableHead>:undefined}
+          {open ? <TableHead>Last Updated</TableHead>: undefined}
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {lists.map((item) => {
+          return (
+            <TableRow>
+              <TableCell className="font-medium max-w-22">
+                <div className="w-22">
+                  <ImageGrid key={item.list_id} images={contentFrom(item).map((it) => it.url)} />
+                </div>
+
+              </TableCell>
+              {open ? <TableCell>Date</TableCell>: undefined}
+              {open ? <TableCell>dkfajlfd</TableCell>: undefined}
+            </TableRow>
+          );
+        })}
+      </TableBody>
+    </Table>
+  );
+}
+
+function ProfileImage() {
+  const user = useUserStore(useShallow((state) => state.userdata?.stored));
+
+  return (
+    <div className="flex flex-grow-0">
+      <img
+        className="w-full max-w-52 aspect-square rounded-full"
+        src={
+          supabase.storage
+            .from("profile_pictures")
+            .getPublicUrl(user?.profile_image ?? "").data.publicUrl
+        }
+      />
+    </div>
   );
 }
 
