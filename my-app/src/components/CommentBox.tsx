@@ -41,7 +41,7 @@ export interface replyType {
 }
 
 const CommentBox = ({ comment, singleComment, onReplyClick, replyActive, refreshReplies } : Comment) => {
-    const user = useUserStore(useShallow((state) => state.stored));
+    const user = useUserStore(useShallow((state) => state.userdata));
 
     const date = new Date(comment.created_at);
     const [image, setImage] = useState<string>("");
@@ -76,7 +76,7 @@ const CommentBox = ({ comment, singleComment, onReplyClick, replyActive, refresh
         setReplies(data as replyType[]);
     }
     async function getLiked() {
-        const res = await getUserLikedComment(comment.id, user.user_id)
+        const res = await getUserLikedComment(comment.id, user?.user.id!)
 
         setLiked(res)
     }
@@ -98,9 +98,9 @@ const CommentBox = ({ comment, singleComment, onReplyClick, replyActive, refresh
         setLikeCount(prevCount => newLikedStatus ? prevCount + 1 : prevCount - 1);
         try {
             if (newLikedStatus) {
-                await insertLikeByUser(comment.id, user.user_id)
+                await insertLikeByUser(comment.id, user?.user.id!)
             } else {
-                await removeLikeByUser(comment.id, user.user_id)
+                await removeLikeByUser(comment.id, user?.user.id!)
             }
         } catch (error) {
             console.error("Error updating like:", error);

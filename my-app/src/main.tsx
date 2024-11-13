@@ -5,7 +5,6 @@ import {
   createBrowserRouter,
   Navigate,
   RouterProvider,
-  useParams,
 } from "react-router-dom";
 import { HomePage } from "./Pages/Home";
 import App from "./App";
@@ -16,7 +15,6 @@ import BrowsePage from "./Pages/Browse";
 import MovieInfo, { ShowInfo } from "./Pages/Movie-Show-Infor";
 import Recommendations from "./Pages/Recommendations";
 import CommentsPage from "./Pages/CommentsPage";
-import FavoritesPreview from "./components/FavoritesPreview";
 import ListViewPage from "./Pages/ListViewPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ProfilePage from "./Pages/ProfilePage";

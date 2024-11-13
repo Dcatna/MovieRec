@@ -8,7 +8,7 @@ import defualtlist from "./movieicon.png";
 import { Link } from "react-router-dom";
 import defualtFav from "./default_favorite_list.jpg";
 import { useShallow } from "zustand/shallow";
-import { UserProfileImage } from "./user-profile-image";
+//import { UserProfileImage } from "./user-profile-image";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import {
@@ -28,12 +28,12 @@ export function Sidebar({ className }: SidebarProps) {
 
   const user = useUserStore(useShallow((state) => state.userdata?.stored));
   const lists = useUserStore(useShallow((state) => state.lists));
-  const signOut = useUserStore((state) => state.signOut);
+  //const signOut = useUserStore((state) => state.signOut);
   const createList = useUserStore((state) => state.createList);
 
   return (
     <div className={cn("pb-12 h-full", className)}>
-      {user ? (
+      {/* {user ? (
         <div className="mx-4 my-6 flex flex-col">
           <UserProfileImage className="w-full h-52" />
           <div className="flex flex-row my-6 justify-between items-center">
@@ -41,7 +41,7 @@ export function Sidebar({ className }: SidebarProps) {
             <Button onClick={signOut}>Sign out</Button>
           </div>
         </div>
-      ) : undefined}
+      ) : undefined} */}
       <div className="space-y-4 py-4">
         <div className="flex items-center justify-between">
           <div className="flex">
@@ -51,11 +51,13 @@ export function Sidebar({ className }: SidebarProps) {
             />
             <p className="ml-1 text-lg">Your Library</p>
           </div>
-          <CreateListDialog
-            onConfirm={(name, description, pub) =>
-              createList(name, description, pub)
-            }
-          />
+          <div className="mr-2">
+            <CreateListDialog 
+              onConfirm={(name, description, pub) =>
+                createList(name, description, pub)
+              }
+            />
+          </div>
         </div>
         <div className="grid grid-cols-1 gap-4">
           {user !== null ? (
