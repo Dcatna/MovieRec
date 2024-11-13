@@ -24,7 +24,7 @@ const SearchPage = ({ searchState }: { searchState: ResourceType }) => {
 
   const search = searchParam.get("query") ?? ""
 
-  const { data, fetchNextPage, hasNextPage } = useInfiniteQuery({
+  const { data, fetchNextPage, hasNextPage, isLoading } = useInfiniteQuery({
     queryKey: ["search", search, searchState],
     queryFn: async ({ pageParam = 1 }) => {
       if (searchState === "movie") {
@@ -55,7 +55,8 @@ const SearchPage = ({ searchState }: { searchState: ResourceType }) => {
       lastPage.page < lastPage.total_pages ? lastPage.page + 1 : undefined,
   });
 
-  useInfiniteScroller(0.9, () => {
+
+  useInfiniteScroller(0.95, !isLoading, () => {
     if (hasNextPage) {
       fetchNextPage();
     }

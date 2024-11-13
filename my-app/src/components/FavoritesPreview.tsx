@@ -40,6 +40,7 @@ const FavortiesPage = () => {
                 {favorites.map((item) => {
                     return (
                         <ContentListItem 
+                            className="aspect-[2/3]"
                             key={`${item.isMovie}-${item.id}`}
                             favorite={true}
                             contentId={item.id}

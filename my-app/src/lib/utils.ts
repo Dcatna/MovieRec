@@ -55,9 +55,30 @@ export function getOrThrow<T, E = string>(result: Result<T, E>): T {
 
 export const useInfiniteScroller = (
   scrolledPct: number,
+  enabled: boolean,
   onScrolledToBreakpoint: () => void
 ) => {
   const { ref } = useScrollContext();
+
+  // useEffect(() => {
+  //   const handleScroll = () => {
+  //     // Check if the window is scrolled to the bottom
+  //     if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight * scrolledPct) {
+  //       if (enabled) {
+  //         console.log("You've reached the bottom of the page window!");
+  //         onScrolledToBreakpoint()
+  //       }
+  //     }
+  //   };
+
+  //   // Add the scroll event listener
+  //   window.addEventListener('scroll', handleScroll);
+
+  //   // Cleanup the event listener on component unmount
+  //   return () => {
+  //     window.removeEventListener('scroll', handleScroll);
+  //   };
+  // }, [enabled, scrolledPct]);
 
   useEffect(() => {
     const scrollableDiv = ref.current;
@@ -65,7 +86,10 @@ export const useInfiniteScroller = (
       if (scrollableDiv) {
         const { scrollTop, scrollHeight, clientHeight } = scrollableDiv;
         if (scrollTop + clientHeight >= scrollHeight * scrolledPct) {
-          onScrolledToBreakpoint();
+          if (enabled) {
+            console.log("You've reached the bottom of the page ref!");
+            onScrolledToBreakpoint()
+          }
         }
       }
     };

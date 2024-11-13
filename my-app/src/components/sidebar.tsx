@@ -1,14 +1,10 @@
 import React, { useRef } from "react";
 import { useUserStore } from "../Data/userstore";
-import { cn } from "../lib/utils";
 import { ImageGrid } from "./poster-item";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faGripLinesVertical } from "@fortawesome/free-solid-svg-icons";
 import defualtlist from "./movieicon.png";
-import { Link } from "react-router-dom";
-import defualtFav from "./default_favorite_list.jpg";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useShallow } from "zustand/shallow";
-//import { UserProfileImage } from "./user-profile-image";
+import { UserProfileImage } from "./user-profile-image";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import {
@@ -24,100 +20,150 @@ import { contentFrom } from "@/Data/supabase-client";
 
 export interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
-export function Sidebar({ className }: SidebarProps) {
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarRail,
+} from "@/components/ui/sidebar";
+const data = [
+  {
+    title: "Browse",
+    url: "/browse",
+    items: [
+      {
+        title: "Movies",
+        url: "/browse/movie",
+      },
+      {
+        title: "Shows",
+        url: "/browse/show",
+      },
+    ],
+  },
+  {
+    title: "Search",
+    url: "/search",
+    items: [
+      {
+        title: "Movies",
+        url: "/search/movie",
+      },
+      {
+        title: "Shows",
+        url: "/search/show",
+      },
+    ],
+  },
+  {
+    title: "Home",
+    url: "/home",
+    items: [
+      {
+        title: "Discover",
+        url: "/home",
+      },
+      {
+        title: "Profile",
+        path: "/profile"
+      }
+    ],
+  },
+];
 
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const user = useUserStore(useShallow((state) => state.userdata?.stored));
-  const lists = useUserStore(useShallow((state) => state.lists));
-  //const signOut = useUserStore((state) => state.signOut);
+  const signOut = useUserStore((state) => state.signOut);
   const createList = useUserStore((state) => state.createList);
+  const location = useLocation()
+  const navigate = useNavigate()
+
+  const lists = useUserStore((state) => state.lists)
 
   return (
-    <div className={cn("pb-12 h-full", className)}>
-      {/* {user ? (
-        <div className="mx-4 my-6 flex flex-col">
-          <UserProfileImage className="w-full h-52" />
-          <div className="flex flex-row my-6 justify-between items-center">
-            <text className="text-2xl">{user?.username}</text>
-            <Button onClick={signOut}>Sign out</Button>
+    <Sidebar {...props}>
+      <SidebarHeader>
+        {user ? (
+          <div className="mx-4 my-6 flex flex-col">
+            <UserProfileImage className="w-full h-52" />
+            <div className="flex flex-row justify-between items-center">
+              <text className="text-2xl">{user?.username}</text>
+              <Button onClick={signOut}>Sign out</Button>
+            </div>
+            <CreateListDialog
+              onConfirm={(name, desc, pub) => createList(name, desc, pub)}
+            ></CreateListDialog>
           </div>
+        ) : (
+          <div>
+           <Link to={"/auth"}>
+            <Button>
+                Create an account
+              </Button>
+           </Link>
+          </div>
+        )}
+      </SidebarHeader>
+      <SidebarContent>
+        <div>
+          {data.map((item) => {
+            return (
+              <SidebarGroup key={item.title}>
+                <SidebarGroupLabel>{item.title}</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {item.items.map((item) => (
+                      <SidebarMenuItem key={item.title}>
+                        <SidebarMenuButton asChild isActive={item.url === location.pathname}>
+                          <a onClick={() => navigate(item.url ?? "")}>{item.title}</a>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            );
+          })}
         </div>
-      ) : undefined} */}
-      <div className="space-y-4 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex">
-            <FontAwesomeIcon
-              className="mt-1 size-6"
-              icon={faGripLinesVertical}
-            />
-            <p className="ml-1 text-lg">Your Library</p>
-          </div>
-          <div className="mr-2">
-            <CreateListDialog 
-              onConfirm={(name, description, pub) =>
-                createList(name, description, pub)
-              }
-            />
-          </div>
-        </div>
-        <div className="grid grid-cols-1 gap-4">
-          {user !== null ? (
-            <Link
-              to={`/profile/${user?.user_id}/favorites`}
-              state={{ undefined }}
-            >
+        {/* We create a SidebarGroup for each parent. */}
+        {lists.map((item) => {
+          const images = contentFrom(item)?.map((it) => it.url) ?? [];
+          return (
+            <Link to={`/list/${item.list_id}`} state={{ item }}>
               <div
-                key="favorite_pinned"
+                key={item.list_id}
                 className="flex items-center space-x-4 rounded-lg bg-white shadow-md p-4"
               >
                 <div className="w-20 h-20 flex-shrink-0">
-                  <img
-                    src={defualtFav}
-                    alt="default favorite"
-                    className="w-full h-full object-cover rounded-lg"
-                  />
+                  {images.length > 3 ? (
+                    <ImageGrid images={images} />
+                  ) : (
+                    <img
+                      src={images[0] ?? defualtlist}
+                      alt="list preview"
+                      className="w-full h-full object-cover rounded-lg"
+                    />
+                  )}
                 </div>
                 <div className="flex flex-col">
-                  <p className="font-bold text-lg">Favorites</p>
+                  <p className="font-bold text-lg">{item.name}</p>
                   <p className="text-gray-500 text-sm">
-                    Created by: {user?.username}
+                    Created by: {item.name}
                   </p>
                 </div>
               </div>
             </Link>
-          ) : undefined}
-
-          {lists.map((item) => {
-            const images = contentFrom(item)?.map((it) => it.url) ?? [];
-            return (
-              <Link to={`/list/${item.list_id}`} state={{ item }}>
-                <div
-                  key={item.list_id}
-                  className="flex items-center space-x-4 rounded-lg bg-white shadow-md p-4"
-                >
-                  <div className="w-20 h-20 flex-shrink-0">
-                    {images.length > 3 ? (
-                      <ImageGrid images={images} />
-                    ) : (
-                      <img
-                        src={images[0] ?? defualtlist}
-                        alt="list preview"
-                        className="w-full h-full object-cover rounded-lg"
-                      />
-                    )}
-                  </div>
-                  <div className="flex flex-col">
-                    <p className="font-bold text-lg">{item.name}</p>
-                    <p className="text-gray-500 text-sm">
-                      Created by: {item.name}
-                    </p>
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-      </div>
-    </div>
+          );
+        })}
+      </SidebarContent>
+      <SidebarRail />
+    </Sidebar>
   );
 }
 

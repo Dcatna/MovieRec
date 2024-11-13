@@ -7,7 +7,7 @@ import { useShallow } from "zustand/shallow";
 import { useQuery } from "@tanstack/react-query";
 import { useUserStore } from "@/Data/userstore";
 import { Link, Outlet, useParams } from "react-router-dom";
-import { addToListByID, supabase } from "@/Data/supabase-client";
+import { addToListByID } from "@/Data/supabase-client";
 
 const partial_url = "https://image.tmdb.org/t/p/original/";
 

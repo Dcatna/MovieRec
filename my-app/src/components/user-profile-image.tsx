@@ -1,11 +1,11 @@
 import { useShallow } from "zustand/shallow";
 import { useUserStore } from "../Data/userstore";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { PersonIcon } from "@radix-ui/react-icons";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
-import { getProfileImageUrl } from "@/Data/supabase-client";
+import { supabase } from "@/Data/supabase-client";
 import { FastAverageColor } from "fast-average-color";
+import { Skeleton } from "./ui/skeleton";
 
 export function UserProfileImage({
   className,
@@ -13,17 +13,13 @@ export function UserProfileImage({
   const user = useUserStore(useShallow((state) => state.userdata?.stored));
   const [dominantRgb, setDominantRgb] = useState("rgba(0, 0, 0, 0)");
 
-  const imgSrc = useMemo(() => {
-    return (
-      getProfileImageUrl(user?.profile_image ?? "", { download: true }) ?? ""
-    );
-  }, [user?.profile_image]);
+
 
   useEffect(() => {
     const fac = new FastAverageColor();
     const image = new Image();
     image.crossOrigin = "anonymous";
-    image.src = imgSrc;
+    image.src = supabase.storage.from('profile_pictures').getPublicUrl(user?.profile_image??"").data.publicUrl;
 
     image.onload = () => {
       fac.getColorAsync(image).then((c) => {
@@ -31,11 +27,11 @@ export function UserProfileImage({
         setDominantRgb(c.rgba); // Set the rgba value as the dominant color
       });
     };
-  }, [imgSrc]);
+  }, [user]);
 
   return (
     <div className={cn("relative w-fit h-fit")}>
-      <Avatar
+      <Avatar key={(user?.profile_image ?? "" )+user?.user_id}
         className={cn(className, "relative z-10 rounded-full")}
         style={{
           boxShadow: `
@@ -47,9 +43,11 @@ export function UserProfileImage({
           `,
         }}
       >
-        <AvatarImage className="h-full w-full rounded-full" src={imgSrc} />
+        <AvatarImage 
+        className="h-full w-full rounded-full" 
+        src={supabase.storage.from('profile_pictures').getPublicUrl(user?.profile_image??"").data.publicUrl} />
         <AvatarFallback className="h-full w-full rounded-full">
-          <PersonIcon />
+          <Skeleton className="h-full w-full rounded-full"/>
         </AvatarFallback>
       </Avatar>
     </div>

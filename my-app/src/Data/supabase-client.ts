@@ -1,9 +1,7 @@
 import { createClient, PostgrestError, User } from "@supabase/supabase-js";
 import { Database } from "./supabase";
 import { ContentItem, ListItem, ListWithItems } from "./userstore";
-import { ContentItemProps } from "@/components/ContentListItem";
 import { favs } from "@/types/types";
-import { ShowListResult } from "@/types/MovieListResponse";
 import { CommentType } from "@/components/CommentBox";
 import { failureResult, Result, successResult } from "@/lib/utils";
 

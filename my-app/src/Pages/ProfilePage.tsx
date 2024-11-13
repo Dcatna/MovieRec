@@ -1,7 +1,7 @@
 import { useUserStore } from "@/Data/userstore";
 import { useShallow } from "zustand/shallow";
 import {  useState } from "react";
-import {  ListWithPostersRpcResponse, supabase } from "@/Data/supabase-client";
+import {  ListWithPostersRpcResponse } from "@/Data/supabase-client";
 import { FaTrashAlt, FaEye, FaEyeSlash, FaPen } from 'react-icons/fa'; // Importing pen icon
 import defualt_user_image from "../components/user_default.jpg";
 
@@ -15,21 +15,8 @@ const ProfilePage = () => {
     deleteListById(list_id);
   }
 
-  async function handleProfileImageUpload(file: File) {
-    try {
-      const { data: imageData, error: uploadError } = await supabase
-        .storage
-        .from("profile_images")
-        .upload(`public/${user?.user_id}/${file.name}`, file);
-
-      if (uploadError) {
-        console.error("Upload error:", uploadError);
-        return;
-      }
-      const imageUrl = supabase.storage.from("profile_images").getPublicUrl(imageData.path).data.publicUrl;
-    } catch (error) {
-      console.error("Error uploading profile image:", error);
-    }
+  async function handleProfileImageUpload(_: File) {
+    
   }
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {

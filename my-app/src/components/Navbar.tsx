@@ -12,7 +12,7 @@ const Navbar = () => {
     const user = useUserStore(useShallow((state) => state.userdata?.stored));
 
     return (
-        <nav className="sticky top-0 z-50 bg-white shadow-sm"> {/* Add sticky classes here */}
+        <div className="sticky top-0 z-50 bg-white shadow-sm"> {/* Add sticky classes here */}
             <div className="w-full flex justify-center items-center bg-transparent py-4">
                 <Button asChild variant="ghost">
                     <Link to="/home">Home</Link>
@@ -39,7 +39,7 @@ const Navbar = () => {
                     <FontAwesomeIcon icon={faMagnifyingGlass} />
                 </Link>
             </div>
-        </nav>
+        </div>
     );
 };
 

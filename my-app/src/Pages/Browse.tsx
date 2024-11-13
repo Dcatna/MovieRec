@@ -65,7 +65,7 @@ const BrowsePage = (
     },
   });
 
-  useInfiniteScroller(0.9, () => {
+  useInfiniteScroller(0.9, true, () => {
     if (hasNextPage) {
       fetchNextPage()
     }

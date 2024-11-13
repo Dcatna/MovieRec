@@ -4,10 +4,7 @@ import {
   deleteListById,
   getUserById,
   ListWithPostersRpcResponse,
-  selectListByIdWithItems,
   selectListsByIdsWithPoster,
-  selectListsByIdWithPosters,
-  selectListsByUserId,
   signInWithEmailAndPassword,
   StoredUser,
   supabase,
@@ -81,8 +78,25 @@ export interface UserStore {
   deleteList: (listId: string) => Promise<void>;
 }
 
+
+function getInitialUserData() {
+  try {
+    const prevUser = localStorage.getItem("prev_user") as User | null
+    const prevData = localStorage.getItem("stored_user") as StoredUser | null
+    console.log(prevUser, prevData)
+    if (prevUser && prevData && prevUser.id === prevData.user_id) {
+      return {
+        user: prevUser,
+        stored: prevData
+      } satisfies UserData
+    }
+  } catch {
+    return undefined
+  }
+}
+
 export const useUserStore = create<UserStore>((set, get) => ({
-  userdata: undefined,
+  userdata: getInitialUserData(),
   lists: [],
   favorites: [],
   init: () => {
@@ -90,7 +104,7 @@ export const useUserStore = create<UserStore>((set, get) => ({
       console.log(event, session);
 
       if (event === "INITIAL_SESSION") {
-        // handle initial session
+          
       } else if (event === "SIGNED_IN") {
         // handle sign in event
         get()
@@ -100,6 +114,8 @@ export const useUserStore = create<UserStore>((set, get) => ({
             get().refreshFavorites();
           });
       } else if (event === "SIGNED_OUT") {
+        localStorage.removeItem("prev_user")
+        localStorage.removeItem("stored_user")
         set({
           userdata: undefined,
           lists: [],
@@ -117,9 +133,12 @@ export const useUserStore = create<UserStore>((set, get) => ({
 
     initializeUser().then((result) => {
       if (!result.ok) {
-        return data.subscription.unsubscribe;
+        localStorage.removeItem("prev_user")
+        localStorage.removeItem("stored_user")
+        return
       }
-
+      localStorage.setItem("prev_user", JSON.stringify(result.data.user))
+      localStorage.setItem("stored_user", JSON.stringify(result.data.stored))
       set({
         userdata: result.data,
       });
@@ -183,7 +202,8 @@ export const useUserStore = create<UserStore>((set, get) => ({
     if (!stored.ok) {
       return;
     }
-
+    localStorage.setItem("prev_user", JSON.stringify(data.user))
+    localStorage.setItem("stored_user", JSON.stringify(stored))
     set({
       userdata: {
         user: data.user,
@@ -200,6 +220,7 @@ export const useUserStore = create<UserStore>((set, get) => ({
   },
   toggleItemFavorite: async (item) => {
     const userId = get().userdata?.user.id;
+    if (!userId) { return }
     if (item.favorite) {
       const userId = get().userdata?.user.id;
       const { error } = await supabase
