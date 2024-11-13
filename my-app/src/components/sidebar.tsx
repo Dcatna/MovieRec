@@ -49,6 +49,8 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
+import favorites_list_icon from "./default_favorite_list.jpg"
+
 const data = [
   {
     title: "Browse",
@@ -106,12 +108,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       className="max-h-screen overflow-hidden"
     >
       <SidebarHeader>
-        <ProfileImage />
+        {/* <ProfileImage /> */}
         <Card>
           <SidebarGroup>
             <SidebarGroupLabel>Quick access</SidebarGroupLabel>
             <SidebarGroupContent className="space-y-4">
               {data.map((item) => {
+                console.log(item, "SIDEBAR")
                 return (
                   <SidebarItem
                     name={item.title}
@@ -136,6 +139,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
 function ListTable({}) {
   const lists = useUserStore((state) => state.lists);
+  const favorites = useUserStore((state) => state.favorites)
+  const user = useUserStore(useShallow((state) => state.userdata?.stored));
+
+  console.log(favorites,'FAVS')
   const { state } = useSidebar();
 
   // if (state === "collapsed") {
@@ -153,7 +160,7 @@ function ListTable({}) {
   // }
 
   const open = state === 'expanded' || state === "extra"
-
+  const navigate = useNavigate();
   return (
     <Table>
       <TableCaption>Mods available to download.</TableCaption>
@@ -161,21 +168,30 @@ function ListTable({}) {
         <TableRow>
           {open ? <TableHead>{state === "extra" ? "Title" : ""}</TableHead>:undefined}
           {open ? <TableHead>Date Added</TableHead>:undefined}
-          {open ? <TableHead>Last Updated</TableHead>: undefined}
+          {open ? <TableHead>Created By</TableHead>: undefined}
         </TableRow>
       </TableHeader>
       <TableBody>
+        {user ? <TableRow>
+          <TableCell>
+            <div className="w-[6rem]">
+              <img src={favorites_list_icon} alt="" />
+            </div>
+          </TableCell>
+          {open ? <TableCell className="font-medium text-base">Favorites</TableCell>: undefined}
+              {open ? <TableCell className="font-medium text-base">{user.username}</TableCell>: undefined}
+        </TableRow> : undefined}
         {lists.map((item) => {
           return (
             <TableRow>
-              <TableCell className="font-medium max-w-22">
-                <div className="w-22">
+              <TableCell className="font-medium max-w-22" >
+                <div className="w-[6rem]" onClick={() => navigate(`list/${item.list_id}`)} >
                   <ImageGrid key={item.list_id} images={contentFrom(item).map((it) => it.url)} />
                 </div>
 
               </TableCell>
-              {open ? <TableCell>Date</TableCell>: undefined}
-              {open ? <TableCell>dkfajlfd</TableCell>: undefined}
+              {open ? <TableCell className="font-medium text-base">{item.name}</TableCell>: undefined}
+              {open ? <TableCell className="font-medium text-base">{item.username}</TableCell>: undefined}
             </TableRow>
           );
         })}

@@ -1,4 +1,4 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import { useUserStore } from "./Data/userstore";
 import { useEffect, useRef, useState } from "react";
 import { AppSidebar } from "./components/sidebar";
@@ -21,12 +21,14 @@ import {
   PlusCircleIcon,
   SearchIcon,
 } from "lucide-react";
+import { supabaseSignOut } from "./Data/supabase-client";
 
 function SearchBar() {
   const [text, setText] = useState("");
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
+    
   };
 
   return (
@@ -59,7 +61,8 @@ function SearchBar() {
 function App() {
   const subscribe = useUserStore(useShallow((state) => state.init));
   const scrollAreaRef = useRef<HTMLDivElement | null>(null);
-
+  const user = useUserStore((state) => state.userdata)
+  const navigate = useNavigate()
   useEffect(() => {
     const unsubscribe = subscribe();
     return () => {
@@ -71,43 +74,46 @@ function App() {
     <SidebarProvider className="max-h-screen overflow-hidden">
       <AppSidebar variant="inset" collapsible="icon" />
       <div className="flex flex-col max-h-screen w-full">
-        <div className="flex flex-row items-center justify-start max-h-[calc(12vh)]">
-          <SidebarTrigger></SidebarTrigger>
-          <ExpandSidebarArrow></ExpandSidebarArrow>
-          <div className="max-w-lg w-full p-8">
-            <SearchBar></SearchBar>
-          </div>
-          <Button size={"icon"} variant={"default"} className="rounded-full">
-            <HomeIcon></HomeIcon>
-          </Button>
-          <Button
-            size={"icon"}
-            variant={"default"}
-            className="rounded-full ms-12"
-          >
-            <PlusCircleIcon />
-          </Button>
-          <Button
-            size={"lg"}
-            variant={"default"}
-            className="rounded-full ms-12"
-          >
-            Sign Out
-          </Button>
+  <div className="flex flex-row items-center justify-between max-h-[calc(12vh)] w-full">
+    <div className="flex items-center">
+      <SidebarTrigger />
+      <ExpandSidebarArrow />
+    </div>
+
+    <div className="flex items-center justify-center flex-grow max-w-lg w-full p-8">
+      <SearchBar />
+    </div>
+    <div className="flex items-center space-x-4 mr-2">
+      <Button size="icon" variant="default" className="rounded-full">
+        <HomeIcon />
+      </Button>
+      <Button size="icon" variant="default" className="rounded-full">
+        <PlusCircleIcon />
+      </Button>
+      {user ? 
+      <Button size="lg" variant="default" className="rounded-full" onClick={() => supabaseSignOut()}>
+        Sign Out
+      </Button> :
+      <Button size="lg" variant="default" className="rounded-full" onClick={() => navigate("/auth/login")}>
+        Sign In
+      </Button>
+      }
+    </div>
+  </div>
+  <SidebarInset className="overflow-hidden">
+    <ScrollProvider provideRef={scrollAreaRef}>
+      <Card className="bg-slate-50 w-full">
+        <div
+          ref={scrollAreaRef}
+          className="grid grid-cols-1 max-h-[calc(88vh)] overflow-y-auto overflow-x-hidden my-4"
+        >
+          <Outlet />
         </div>
-        <SidebarInset className="overflow-hidden">
-          <ScrollProvider provideRef={scrollAreaRef}>
-            <Card className="bg-slate-50 w-full">
-              <div
-                ref={scrollAreaRef}
-                className="grid grid-cols-1 max-h-[calc(88vh)] overflow-y-auto overflow-x-hidden my-4"
-              >
-                <Outlet />
-              </div>
-            </Card>
-          </ScrollProvider>
-        </SidebarInset>
-      </div>
+      </Card>
+    </ScrollProvider>
+  </SidebarInset>
+</div>
+
     </SidebarProvider>
   );
 }
