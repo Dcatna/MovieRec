@@ -34,7 +34,7 @@ const ContentListItem = (props: ContentItemProps) => {
   }
 
   return (
-    <div className={cn(props.className, " relative group")} onClick={() => { props.onClick?.() }} style={{aspectRatio: 2 / 3}}>
+    <div className={cn(props.className, "aspect-[2/3] relative group")} onClick={() => { props.onClick?.() }}>
       <img 
         className="object-cover w-full h-full rounded-md" 
         src={props.posterUrl} 

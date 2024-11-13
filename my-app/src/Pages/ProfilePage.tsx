@@ -3,6 +3,7 @@ import { useShallow } from "zustand/shallow";
 import {  useState } from "react";
 import {  ListWithPostersRpcResponse, supabase } from "@/Data/supabase-client";
 import { FaTrashAlt, FaEye, FaEyeSlash, FaPen } from 'react-icons/fa'; // Importing pen icon
+import defualt_user_image from "../components/user_default.jpg";
 
 const ProfilePage = () => {
   const user = useUserStore(useShallow((state) => state.userdata?.stored));
@@ -38,7 +39,7 @@ const ProfilePage = () => {
       handleProfileImageUpload(file); // Automatically upload after selection
     }
   };
-
+  console.log(user?.profile_image, "PROFIEL")
   return (
     <div className="flex flex-col items-center justify-center bg-gray-100 min-h-screen p-4">
       <div className="bg-white shadow-lg rounded-lg p-6 max-w-sm w-full mt-10 relative">
@@ -46,7 +47,7 @@ const ProfilePage = () => {
           <div className="relative">
             <img
               className="rounded-full h-24 w-24 border-2 border-gray-300"
-              src={user?.profile_image ?? ""}
+              src={user?.profile_image || defualt_user_image}
               alt="Profile Picture"
             />
             {/* Pencil icon overlay */}

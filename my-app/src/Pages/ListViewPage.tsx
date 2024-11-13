@@ -32,6 +32,7 @@ const ListViewPage = () => {
   const deleteList = useUserStore(useShallow((state) => state.deleteList));
   const favorites = useUserStore(useShallow((state) => state.favorites));
   const listId = params["listId"];
+  const [usersList, setUserList] = useState<boolean>(false)
 
 
 
@@ -62,8 +63,13 @@ const ListViewPage = () => {
             posterUrl: item.poster_path,   
         } satisfies ContentItem
     }) ?? []
-  }, [list, favorites])
+  }, [list])
 
+  useEffect(() => {
+    if (list?.user_id === user?.user_id) {
+      setUserList(true)
+    }
+  }, [listId, list])
   const previewImages = (items.slice(0, 4).map((it) => it.posterUrl).filter((it) => it !== undefined)) ?? []
 
   if (list === undefined) {
@@ -71,13 +77,13 @@ const ListViewPage = () => {
   }
 
   if (list.user_id === user?.user_id) {
-    
+  
   }
 
-  console.log(previewImages, "IMGAES")
   return (
     <div className="flex flex-col items-start p-8 bg-white shadow-md rounded-lg mx-auto relative">
         <ListHeader
+            isUsers={usersList}
             total_items={items.length}
             title={list.name}
             description={list.description}
@@ -89,7 +95,7 @@ const ListViewPage = () => {
       <div className="grid lg:grid-cols-5 sm:grid-cols-2 gap-4 w-full">
         {items.map((item) => {
           return (
-            <ContentListItem className="w-full h-[300px] max-h-[300px]"
+            <ContentListItem
               key={"list_"+item.id}
               favorite={item.favorite}
               contentId={item.id}
@@ -97,6 +103,7 @@ const ListViewPage = () => {
               isMovie={item.isMovie}
               title={item.name}
               posterUrl={item.posterUrl ?? ""}
+              onClick={() => navigate(`/${item.isMovie ? "movie" : "show"}/${item.id}`)}
             />
           );
         })}
@@ -106,6 +113,7 @@ const ListViewPage = () => {
 };
 
 function ListHeader({
+  isUsers,
   total_items,
   images,
   title,
@@ -113,6 +121,7 @@ function ListHeader({
   description,
   onDelete
 }: {
+  isUsers : boolean; 
   total_items : number;
   images: string[];
   title: string;
@@ -120,12 +129,12 @@ function ListHeader({
   description: string;
   onDelete: () => void;
 }) {
-  const [usersList, setUserList] = useState<boolean>(false)
-  const user = useUserStore(useShallow((state) => state.userdata?.stored));
+  // const [usersList, setUserList] = useState<boolean>(false)
+  // const user = useUserStore(useShallow((state) => state.userdata?.stored));
 
-  if(createdBy === user?.user_id){
-    setUserList(true)
-  }
+  // if(createdBy === user?.user_id){
+  //   setUserList(true)
+  // }
   return (
     <div className="flex flex-col items-start p-8 bg-white shadow-md rounded-lg mx-auto relative">
       <div className="flex items-center justify-between w-full mb-8">
@@ -150,7 +159,7 @@ function ListHeader({
             {description}
           </p>
         </div>
-        {usersList === true ? <button
+        {isUsers ? <button
           className="absolute top-4 right-4 bg-gray-300 hover:bg-gray-200 text-black rounded-md p-2 shadow-sm focus:outline-none"
           onClick={onDelete}
         >
