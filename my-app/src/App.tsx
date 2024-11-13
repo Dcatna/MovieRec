@@ -71,8 +71,8 @@ function App() {
     }}
   >
       <AppSidebar variant="inset" collapsible="icon" />
-    <div className="flex flex-col">
-       <div className="flex flex-row items-center justify-start">
+    <div className="flex flex-col max-h-screen w-full">
+       <div className="flex flex-row items-center justify-start max-h-[calc(12vh)]">
         <SidebarTrigger></SidebarTrigger>
           <div className="max-w-lg w-full p-8">
             <SearchBar></SearchBar>
@@ -89,10 +89,10 @@ function App() {
         </div>
         <SidebarInset className="overflow-hidden">
         <ScrollProvider provideRef={scrollAreaRef}>
-          <Card className="bg-slate-50">
+          <Card className="bg-slate-50 w-full">
           <div
             ref={scrollAreaRef}
-            className="grid max-h-screen overflow-y-auto overflow-x-hidden my-4"
+            className="grid grid-cols-1 max-h-[calc(88vh)] overflow-y-auto overflow-x-hidden my-4"
           >
             <Outlet />
           </div>

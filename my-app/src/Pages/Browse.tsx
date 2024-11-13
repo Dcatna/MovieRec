@@ -89,7 +89,7 @@ const BrowsePage = (
   }, [data, favorites]);
 
   return (
-    <div className="w-full h-full">
+    <div className="min-w-full h-full">
       <div className="flex flex-col items-center">
         <div className="my-4 w-full mx-auto">
           <div className="flex justify-center items-center space-x-4 py-2 cursor-pointer">
@@ -120,7 +120,7 @@ const BrowsePage = (
           </div>
         </div>
       </div>
-      <div className="grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 gap-6 w-full max-w-6xl px-4">
+      <div className="grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 gap-6 w-full px-4">
           {items.map((item) => (
                <ContentListItem
                   key={`${item.id}-${item.isMovie}-${item.favorite}`}
