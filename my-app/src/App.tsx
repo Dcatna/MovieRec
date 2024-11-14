@@ -25,15 +25,19 @@ import { supabaseSignOut } from "./Data/supabase-client";
 
 function SearchBar() {
   const [text, setText] = useState("");
+  const navigate = useNavigate()
 
-  const handleSubmit = (e: any) => {
-    e.preventDefault();
-    
-  };
+  const handleClick = () => {
+    if (text.trim()) {
+      navigate(`/search?query=${text.trim()}`);
+    } else {
+      navigate(`/search`);
+    }
+  }
 
   return (
     <form
-      onSubmit={handleSubmit}
+      onClick={handleClick}
       className="flex flex-row w-full max-w-lg rounded-full h-fit backdrop-brightness-75 items-center space-x-1"
     >
       <Input

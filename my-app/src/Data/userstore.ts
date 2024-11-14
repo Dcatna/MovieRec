@@ -220,42 +220,51 @@ export const useUserStore = create<UserStore>((set, get) => ({
   },
   toggleItemFavorite: async (item) => {
     const userId = get().userdata?.user.id;
-    if (!userId) { return }
-    if (item.favorite) {
-      const userId = get().userdata?.user.id;
-      const { error } = await supabase
-        .from("favoritemovies")
-        .delete()
-        .eq(item.isMovie ? "movie_id" : "show_id", item.id)
-        .eq("user_id", userId ?? "");
-      if (error) {
-        return;
-      }
-      set((state) => {
-        const updated = state.favorites.filter(
-          (it) => it.id !== item.id && item.isMovie !== item.isMovie
-        );
-        return {
-          favorites: updated,
-        };
-      });
-    } else {
-      const { error } = await supabase.from("favoritemovies").insert({
-        movie_id: item.isMovie ? item.id : -1,
-        show_id: item.isMovie ? -1 : item.id,
-        title: item.name,
-        overview: item.description,
-        poster_path: item.posterUrl,
-      });
+    if (!userId) return;
 
-      if (error) {
-        return;
-      }
-      set((state) => ({
-        favorites: [...state.favorites, item],
-      }));
+    if (item.favorite) {
+        // Unfavorite item
+        const { error } = await supabase
+            .from("favoritemovies")
+            .delete()
+            .eq(item.isMovie ? "movie_id" : "show_id", item.id)
+            .eq("user_id", userId);
+
+        if (error) {
+            console.error("Error removing favorite:", error);
+            return;
+        }
+
+        // Update favorites state without removing unrelated items
+        set((state) => {
+            const updatedFavorites = state.favorites.filter(
+                (it) => !(it.id === item.id && it.isMovie === item.isMovie)
+            );
+            return { favorites: updatedFavorites };
+        });
+    } else {
+        // Favorite item
+        const { error } = await supabase.from("favoritemovies").insert({
+            movie_id: item.isMovie ? item.id : -1,
+            show_id: item.isMovie ? -1 : item.id,
+            user_id: userId,
+            title: item.name,
+            overview: item.description,
+            poster_path: item.posterUrl,
+        });
+
+        if (error) {
+            console.error("Error adding favorite:", error);
+            return;
+        }
+
+        // Add item to favorites state
+        set((state) => ({
+            favorites: [...state.favorites, { ...item, favorite: true }],
+        }));
     }
-  },
+}
+,
   createList: async (name: string, description: string, pub: boolean) => {
     const user = get().userdata?.user;
     if (!user) {

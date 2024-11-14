@@ -83,6 +83,9 @@ const router = createBrowserRouter([
         }
       },
       {
+        path: "favorites", element: <FavortiesPage/>
+      },
+      {
         path:"profile", element: <ProtectedRoute><ProfilePage/></ProtectedRoute>
       },
       {

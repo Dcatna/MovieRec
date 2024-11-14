@@ -114,7 +114,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarGroupLabel>Quick access</SidebarGroupLabel>
             <SidebarGroupContent className="space-y-4">
               {data.map((item) => {
-                console.log(item, "SIDEBAR")
                 return (
                   <SidebarItem
                     name={item.title}
@@ -139,10 +138,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
 function ListTable({}) {
   const lists = useUserStore((state) => state.lists);
-  const favorites = useUserStore((state) => state.favorites)
+  //const favorites = useUserStore((state) => state.favorites)
   const user = useUserStore(useShallow((state) => state.userdata?.stored));
 
-  console.log(favorites,'FAVS')
   const { state } = useSidebar();
 
   // if (state === "collapsed") {
@@ -163,19 +161,19 @@ function ListTable({}) {
   const navigate = useNavigate();
   return (
     <Table>
-      <TableCaption>Mods available to download.</TableCaption>
+      {/* <TableCaption>Mods available to download.</TableCaption> */}
       <TableHeader>
         <TableRow>
-          {open ? <TableHead>{state === "extra" ? "Title" : ""}</TableHead>:undefined}
-          {open ? <TableHead>Date Added</TableHead>:undefined}
+          {open ? <TableHead>{state === "extra" ? "List" : ""}</TableHead>:undefined}
+          {open ? <TableHead>List Name</TableHead>:undefined}
           {open ? <TableHead>Created By</TableHead>: undefined}
         </TableRow>
       </TableHeader>
       <TableBody>
-        {user ? <TableRow>
+        {user ? <TableRow onClick={() => navigate("/favorites")}>
           <TableCell>
-            <div className="w-[6rem]">
-              <img src={favorites_list_icon} alt="" />
+            <div className="w-[6rem]" >
+              <img src={favorites_list_icon} alt="Favorites" />
             </div>
           </TableCell>
           {open ? <TableCell className="font-medium text-base">Favorites</TableCell>: undefined}
@@ -183,9 +181,9 @@ function ListTable({}) {
         </TableRow> : undefined}
         {lists.map((item) => {
           return (
-            <TableRow>
+            <TableRow onClick={() => navigate(`list/${item.list_id}`)}>
               <TableCell className="font-medium max-w-22" >
-                <div className="w-[6rem]" onClick={() => navigate(`list/${item.list_id}`)} >
+                <div className="w-[6rem]">
                   <ImageGrid key={item.list_id} images={contentFrom(item).map((it) => it.url)} />
                 </div>
 

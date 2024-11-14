@@ -10,7 +10,7 @@ export const showListResultToContentItem = (result: ShowListResult | ShowDetailR
     const partial_url = "https://image.tmdb.org/t/p/original/"
     return {
       id: result.id,
-      isMovie: true,
+      isMovie: false,
       name: result.original_name,
       description: result.overview,
       posterUrl: partial_url+result.backdrop_path,
