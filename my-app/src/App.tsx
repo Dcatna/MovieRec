@@ -88,11 +88,11 @@ function App() {
       <SearchBar />
     </div>
     <div className="flex items-center space-x-4 mr-2">
-      <Button size="icon" variant="default" className="rounded-full">
+      <Button size="icon" variant="default" className="rounded-full" onClick={() => navigate('/home')}>
         <HomeIcon />
       </Button>
-      <Button size="icon" variant="default" className="rounded-full">
-        <PlusCircleIcon />
+      <Button size="lg" variant="default" className="rounded-full" onClick={() => navigate("/profile")}>
+        Profile
       </Button>
       {user ? 
       <Button size="lg" variant="default" className="rounded-full" onClick={() => supabaseSignOut()}>

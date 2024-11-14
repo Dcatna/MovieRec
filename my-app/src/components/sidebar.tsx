@@ -35,11 +35,12 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
-import { GlobeIcon, HomeIcon, SearchIcon } from "lucide-react";
+import { GlobeIcon, HomeIcon, SearchIcon, ThumbsUp } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Skeleton } from "./ui/skeleton";
 import { Card } from "./ui/card";
 import ContentListItem from "./ContentListItem";
+import default_movie_list from "./movieicon.png"
 import {
   Table,
   TableBody,
@@ -67,6 +68,11 @@ const data = [
     url: "/home",
     icon: () => <HomeIcon />,
   },
+  {
+    title: "Recommended",
+    url: "/recommended",
+    icon: () => <ThumbsUp/>,
+  }
 ];
 
 function SidebarItem(props: {
@@ -137,8 +143,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 }
 
 function ListTable({}) {
-  const lists = useUserStore((state) => state.lists);
-  //const favorites = useUserStore((state) => state.favorites)
+  const lists = useUserStore((state) => state.lists) || [];  
+  console.log(lists, "LISTS")
+  if (!lists) {
+    return <div>Loading...</div>;
+  } 
   const user = useUserStore(useShallow((state) => state.userdata?.stored));
 
   const { state } = useSidebar();
@@ -159,14 +168,21 @@ function ListTable({}) {
 
   const open = state === 'expanded' || state === "extra"
   const navigate = useNavigate();
+  const createList = useUserStore((state) => state.createList);
   return (
     <Table>
       {/* <TableCaption>Mods available to download.</TableCaption> */}
+      
       <TableHeader>
         <TableRow>
           {open ? <TableHead>{state === "extra" ? "List" : ""}</TableHead>:undefined}
           {open ? <TableHead>List Name</TableHead>:undefined}
           {open ? <TableHead>Created By</TableHead>: undefined}
+          <div className="mt-2">
+            <CreateListDialog onConfirm={(name, description, pub) =>
+                createList(name, description, pub)
+              }/>
+          </div>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -184,7 +200,8 @@ function ListTable({}) {
             <TableRow onClick={() => navigate(`list/${item.list_id}`)}>
               <TableCell className="font-medium max-w-22" >
                 <div className="w-[6rem]">
-                  <ImageGrid key={item.list_id} images={contentFrom(item).map((it) => it.url)} />
+                  {item.ids? <ImageGrid key={item.list_id} images={ (contentFrom(item) || []).map((it) => it.url)}/> :
+                    <img src={default_movie_list} />}
                 </div>
 
               </TableCell>

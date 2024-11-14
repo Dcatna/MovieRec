@@ -152,16 +152,18 @@ export const useUserStore = create<UserStore>((set, get) => ({
   refreshUserLists: async () => {
     const userId = get().userdata?.user.id;
     if (!userId) {
+      set({ lists: [] });  // Set to an empty array if no user
       return;
     }
-
+  
     const result = await selectListsByIdsWithPoster(userId);
     if (!result.ok) {
+      set({ lists: [] });  // Set to an empty array if fetching fails
       return;
     }
-
+  
     set({
-      lists: result.data,
+      lists: result.data ?? [],  // Ensure lists is never undefined
     });
   },
   refreshFavorites: async () => {
@@ -267,6 +269,7 @@ export const useUserStore = create<UserStore>((set, get) => ({
 ,
   createList: async (name: string, description: string, pub: boolean) => {
     const user = get().userdata?.user;
+    
     if (!user) {
       return;
     }

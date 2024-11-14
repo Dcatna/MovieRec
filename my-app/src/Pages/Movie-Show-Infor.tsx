@@ -196,8 +196,8 @@ const MovieInfo = () => {
 
   return (
     <div className="w-full h-full">
-      <div className="fixed right-4 top-4 z-50">
-        <div className="relative">
+      <div className="fixed right-4 top-16 z-50">
+        <div className="relative inline-block">
           <button
             onClick={toggleDropdown}
             className="bg-gray-500 text-white font-semibold py-2 px-4 rounded inline-flex items-center"
@@ -208,11 +208,12 @@ const MovieInfo = () => {
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 20 20"
             >
-              <path d="M5.292 7.293a1 1 0 011.415 0L10 10.586l3.293-3.293a1 1 0 011.415 1.414l-4 4a 1 1 0 01-1.415 0l-4-4a1 1 0 010-1.414z" />
+              <path d="M5.292 7.293a1 1 0 011.415 0L10 10.586l3.293-3.293a1 1 0 011.415 1.414l-4 4a 1 1 0 01-1.415 0l-4-4a 1 1 0 010-1.414z" />
             </svg>
           </button>
           {isDropdownOpen && (
-            <ul className="dropdown-menu absolute text-gray-700 pt-1 bg-white shadow-lg z-50">
+            <ul className="dropdown-menu absolute right-0 mt-2 w-48 text-gray-700 bg-white shadow-lg z-50">
+              {/* Added margin-top for better spacing */}
               {userLists?.map((list) => (
                 <li
                   key={list.list_id}

@@ -65,7 +65,8 @@ const router = createBrowserRouter([
         ]
       },
       {
-        path: "show/:id", element: <ShowInfo/>, 
+        path: "show/:id", 
+        element: <ShowInfo/>, 
         children: [
           {
             path:"comments", element: <CommentsPage/>
