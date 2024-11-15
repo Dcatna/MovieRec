@@ -109,7 +109,7 @@ function App() {
       <Card className="bg-slate-50 w-full">
         <div
           ref={scrollAreaRef}
-          className="grid grid-cols-1 max-h-[calc(88vh)] overflow-y-auto overflow-x-hidden my-4"
+          className="max-h-[calc(88vh)] overflow-y-auto overflow-x-hidden"
         >
           <Outlet />
         </div>

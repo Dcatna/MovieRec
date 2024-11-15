@@ -35,7 +35,9 @@ export const showResponseToContentItems = (res: ShowListResponse) => res.results
 
 class TMDBClient {
 
-    private reqPerMin = 50
+    // https://developer.themoviedb.org/docs/rate-limiting
+    // this is somewhat useless bc this key is being shared
+    private reqPerMin = 60 * 50
 
     private readonly apiKey: string = import.meta.env.VITE_TMDB_API_KEY
     private bucket: TokenBucket = TokenBuckets

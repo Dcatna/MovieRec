@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 
 export const ImageGrid = ({ images }: { images: string[] }) => {
   return (
-    <div className="grid aspect-square h-full">
+    <div className="grid aspect-square h-full rounded-md overflow-clip">
       {images.length > 3 ? (
         // If there are more than 3 images, display a 2x2 grid
         <div className="grid grid-cols-2">
@@ -11,8 +11,7 @@ export const ImageGrid = ({ images }: { images: string[] }) => {
               src={image}
               alt={`Image ${i + 1}`}
               className={cn(
-                "overflow-clip object-cover aspect-square",
-                `rounded-${roundingFromIdx(i)}-lg`
+                "object-cover aspect-square",
               )}
               key={image}
             />
@@ -23,28 +22,12 @@ export const ImageGrid = ({ images }: { images: string[] }) => {
         <img
           src={images[0]}
           alt="Single Image"
-          className="overflow-clip object-cover aspect-square rounded-lg w-full h-full"
+          className="object-cover aspect-square w-full h-full"
         />
       )}
     </div>
   );
 };
-
-const roundingFromIdx = (idx: number) => {
-  switch (idx) {
-    case 0:
-      return "s";
-    case 1:
-      return "e";
-    case 2:
-      return "bs";
-    case 3:
-      return "be";
-    default:
-      return "";
-  }
-};
-
 
 interface ListPreviewItemProps extends React.HTMLAttributes<HTMLDivElement> {
   listName: string | undefined | null;

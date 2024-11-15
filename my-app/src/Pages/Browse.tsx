@@ -36,7 +36,7 @@ const BrowsePage = (
   const {
     data,
     fetchNextPage,
-    hasNextPage,
+    isLoading,
   } = useInfiniteQuery({
     queryKey: ["browse", genreIds, searchState],
     queryFn: async ({ pageParam = 1 }) => {
@@ -48,7 +48,7 @@ const BrowsePage = (
           data: movieResposneToContentItems(data)
         }
       } else {
-        const data = await client.fetchShowList(pageParam, "tv", genreIds)
+        const data = await  client.fetchShowList(pageParam, "tv", genreIds)
         return {
           total_pages: data.total_pages,
           page: data.page,
@@ -57,7 +57,8 @@ const BrowsePage = (
       }
     },
     getNextPageParam: (lastPage) => {
-      if (lastPage.page < lastPage.total_pages) {
+      if (lastPage === undefined) return 1
+      if (lastPage !== undefined && (lastPage.page < lastPage.total_pages)) {
           return lastPage.page + 1;
       } else {
           return undefined;
@@ -65,10 +66,9 @@ const BrowsePage = (
     },
   });
 
-  useInfiniteScroller(0.9, true, () => {
-    if (hasNextPage) {
-      fetchNextPage()
-    }
+
+  useInfiniteScroller(0.99, !isLoading, async () => {
+    await fetchNextPage()
   })
   
   const items = useMemo<ContentItem[]>(() => {
@@ -89,7 +89,7 @@ const BrowsePage = (
   }, [data, favorites]);
 
   return (
-    <div className="min-w-full h-full">
+    <div className="w-full h-full">
       <div className="flex flex-col items-center">
         <div className="my-4 w-full mx-auto">
           <div className="flex justify-center items-center space-x-4 py-2 cursor-pointer">
@@ -120,7 +120,7 @@ const BrowsePage = (
           </div>
         </div>
       </div>
-      <div className="grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 gap-6 w-full px-4">
+      <div className="grid lg:grid-cols-5 md:grid-cols-4 sm:grid-cols-3 grid-cols-2 gap-6 h-full space-x-1 space-y-1 mx-2">
           {items.map((item) => (
                <ContentListItem
                   key={`${item.id}-${item.isMovie}-${item.favorite}`}

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useLayoutEffect, useRef, useState } from "react";
 import { useUserStore } from "@/Data/userstore";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
@@ -12,7 +12,32 @@ export interface ContentItemProps extends React.HTMLAttributes<HTMLDivElement> {
   posterUrl: string;
   description: string
   favorite: boolean,
+  imgSize?: number
   onClick?: () => void
+}
+
+type Size = { v: string, px: number }
+const sizes: Array<Size> = [
+  {v: "w92", px: 92},
+  {v:"w154", px: 154},
+  {v:"w185", px: 185},
+  {v:"w342", px: 342},
+  {v:"w500", px: 500},
+  {v:"w780", px: 780},
+  {v:"original", px: 9999} // "original" is the largest option
+]
+
+const getClosestSize = (widthPx: number): string => {
+  // Find the closest size
+  const closestSize = sizes.minByOrNull<Size, number>((e) => {
+    if (widthPx <= e.px) {
+      return e.px - widthPx 
+    } else {
+      return 9999
+    }  
+  })
+
+  return closestSize?.v ?? "w780"
 }
 
 const ContentListItem = (props: ContentItemProps) => {
@@ -33,12 +58,15 @@ const ContentListItem = (props: ContentItemProps) => {
     )
   }
 
+  const src = props.posterUrl.replace("original", getClosestSize(props.imgSize ?? 700))
+  console.log(src)
   return (
     <div>
       <div className={cn(props.className, "aspect-[2/3] relative group")} onClick={() => { props.onClick?.() }}>
         <img 
           className="object-cover w-full h-full rounded-md" 
-          src={props.posterUrl} 
+          loading="lazy"
+          src={src} 
           alt={props.title} 
         />
         <div className="rounded-md absolute bottom-0 left-0 bg-gradient-to-t from-black to-transparent w-full h-4/6"/>
