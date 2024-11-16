@@ -87,7 +87,7 @@ const BrowsePage = (
       }
     }) ?? []
   }, [data, favorites]);
-
+  console.log(items)
   return (
     <div className="w-full h-full">
       <div className="flex flex-col items-center">

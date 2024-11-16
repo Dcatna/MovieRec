@@ -28,30 +28,28 @@ function SearchBar() {
   const [text, setText] = useState("");
   const navigate = useNavigate();
 
-  // Debounced navigation
     const handleSearch = useCallback(
       debounce((query) => {
         if (query.trim()) {
-          console.log("Navigating to search with query:", query); // Debug log
           navigate(`/search?query=${encodeURIComponent(query.trim())}`);
         }
-      }, 300), // 300ms debounce delay
+      }, 300),
       [navigate]
     );
   
     const handleInputChange = (e) => {
       const value = e.target.value;
-      setText(value); // Update the input state
-      handleSearch(value); // Trigger the debounced search
+      setText(value); 
+      handleSearch(value);
     };
   return (
     <form
       className="flex flex-row w-full max-w-lg rounded-full h-fit backdrop-brightness-75 items-center space-x-1"
-      onSubmit={(e) => e.preventDefault()} // Prevent default form submission
+      onSubmit={(e) => e.preventDefault()}
     >
       <Input
         value={text}
-        onChange={handleInputChange} // Handle input changes
+        onChange={handleInputChange}
         className="font-semibold bg-transparent border-none outline-none focus:outline-none rounded-full"
         placeholder="Search..."
       />
@@ -80,11 +78,11 @@ function App() {
     <SidebarProvider className="max-h-screen overflow-hidden">
       <AppSidebar variant="inset" collapsible="icon" />
       <div className="flex flex-col max-h-screen w-full">
-  <div className="flex flex-row items-center justify-between max-h-[calc(12vh)] w-full">
-    <div className="flex items-center">
-      <SidebarTrigger />
-      <ExpandSidebarArrow />
-    </div>
+        <div className="flex flex-row items-center justify-between h-[calc(12vh)] w-full z-50">
+          <div className="flex items-center">
+            <SidebarTrigger />
+            <ExpandSidebarArrow />
+          </div>
 
     <div className="flex items-center justify-center flex-grow max-w-lg w-full p-8">
       <SearchBar />

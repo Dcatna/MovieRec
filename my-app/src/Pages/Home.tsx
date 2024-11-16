@@ -216,10 +216,9 @@ function UserCreatedListListing({
             <Link to={`/list/${item.list_id}`} state={{ item }} key={item.list_id}>
               <ListPreviewItem
                 className="p-2 max-w-full overflow-hidden"
-                title={item.name}
                 description={item.description}
-                images={contentFrom(item).map((it) => it.url)}
-              >
+                images={contentFrom(item).map((it) => it.url)} 
+                listName={undefined}              >
               </ListPreviewItem>
             </Link>
           </div>

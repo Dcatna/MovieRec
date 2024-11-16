@@ -180,7 +180,7 @@ const Recommendations = () => {
                                     isMovie={true}
                                     description={item.overview}
                                     title={item.title} 
-                                    posterUrl={item.backdrop_path} 
+                                    posterUrl={item.poster_path} 
                                     favorite={false}                                   
                                 />
                             </div>
