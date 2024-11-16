@@ -20,6 +20,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import ProfilePage from "./Pages/ProfilePage";
 import { selectListByIdWithItems } from "./Data/supabase-client";
 import FavortiesPage from "./components/FavoritesPreview";
+import Search from "./Pages/Search";
 
 const router = createBrowserRouter([
   {
@@ -30,11 +31,7 @@ const router = createBrowserRouter([
       { path: "home", element: <HomePage /> },
       {
         path: "search",
-        children: [
-          { index: true, element: <Navigate to="/search/movie"/> },
-          { path: "movie", element: <SearchPage searchState={"movie"} /> },
-          { path: "show", element: <SearchPage searchState={"tv"} /> }
-        ],
+        element: <Search />, // Single SearchPage handles both movies and shows based on query params
       },
       {
         path: "auth",

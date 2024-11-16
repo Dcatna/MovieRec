@@ -1,6 +1,6 @@
 import { Outlet, useNavigate } from "react-router-dom";
 import { useUserStore } from "./Data/userstore";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AppSidebar } from "./components/sidebar";
 import { ScrollProvider } from "./ScrollContext";
 import {
@@ -22,42 +22,44 @@ import {
   SearchIcon,
 } from "lucide-react";
 import { supabaseSignOut } from "./Data/supabase-client";
+import debounce from "lodash.debounce";
 
 function SearchBar() {
   const [text, setText] = useState("");
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
-  const handleClick = () => {
-    if (text.trim()) {
-      navigate(`/search?query=${text.trim()}`);
-    } else {
-      navigate(`/search`);
-    }
-  }
-
+  // Debounced navigation
+    const handleSearch = useCallback(
+      debounce((query) => {
+        if (query.trim()) {
+          console.log("Navigating to search with query:", query); // Debug log
+          navigate(`/search?query=${encodeURIComponent(query.trim())}`);
+        }
+      }, 300), // 300ms debounce delay
+      [navigate]
+    );
+  
+    const handleInputChange = (e) => {
+      const value = e.target.value;
+      setText(value); // Update the input state
+      handleSearch(value); // Trigger the debounced search
+    };
   return (
     <form
-      onClick={handleClick}
       className="flex flex-row w-full max-w-lg rounded-full h-fit backdrop-brightness-75 items-center space-x-1"
+      onSubmit={(e) => e.preventDefault()} // Prevent default form submission
     >
       <Input
         value={text}
+        onChange={handleInputChange} // Handle input changes
         className="font-semibold bg-transparent border-none outline-none focus:outline-none rounded-full"
         placeholder="Search..."
-        onInput={(e: any) => setText(e.target.value)}
       />
       <Separator
         orientation="vertical"
         className="h-6 bg-foreground"
       ></Separator>
-      <Button
-        className="bg-transparent hover:bg-transparent hover:outline-none pe-4"
-        size="icon"
-        type="submit" // Set type to "submit" to trigger form submission
-        variant="link"
-      >
-        <SearchIcon />
-      </Button>
+      <SearchIcon />
     </form>
   );
 }
